@@ -6,11 +6,13 @@ import 'package:http/http.dart' as http;
 import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppUpdateService {
   static const _repo = 'brinch-dev/risinge-jagt-app';
   static const _apiUrl = 'https://api.github.com/repos/$_repo/releases/latest';
+  static const _dismissedVersionKey = 'dismissed_update_version';
 
   static Future<void> checkForUpdate(BuildContext context) async {
     if (kIsWeb) return;
@@ -40,6 +42,10 @@ class AppUpdateService {
       final currentVersion = packageInfo.version;
 
       if (!_isNewer(remoteVersion, currentVersion)) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final dismissedVersion = prefs.getString(_dismissedVersionKey);
+      if (dismissedVersion == remoteVersion) return;
 
       if (!context.mounted) return;
       _showUpdateDialog(context, remoteVersion, releaseNotes, downloadUrl);
@@ -87,12 +93,18 @@ class AppUpdateService {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString(_dismissedVersionKey, version);
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
             child: const Text('Senere'),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove(_dismissedVersionKey);
               _downloadAndInstall(context, downloadUrl);
             },
             child: const Text('Opdater nu'),
