@@ -1,141 +1,149 @@
-# Risinge Jagt v1.5.0
+# Risinge Jagtvæsen v2.3.1
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
+Tilgængelig som Android app og web app.
+
+- **Web**: https://risinge-jagt.web.app
+- **Android APK**: https://github.com/brinch-dev/risinge-jagt-app/releases/latest
 
 ## Funktioner
 
-### Kort (map)
-- OpenStreetMap kort med jagtomraader (cirkel-overlay)
-- Taarn/post-markorer med farvekoder (ledig/optaget/din)
-- GPS-tracking med geofencing — advarsler naer graense og uden for omraade
-- **Baggrunds-tracking**: Android foreground service holder GPS aktiv naar appen minimeres
-- Smart geofencing: kun aktiv for tilmeldte events paa eventdagen
-- Geofence-overtraedelser logges automatisk til admin log
+### Forside
+- Dynamisk forside med konfigurerbare blokke (tekst, billede, info)
+- Admin kan redigere forsideindhold via admin panel
+
+### Kort
+- OpenStreetMap kort med jagtområder (polygon-grænser)
+- Tårn/post-markører med farvekoder (ledig/optaget/din)
+- Tårninfo med beskrivelse, type og billedgalleri
+- GPS-tracking med geofencing — advarsler nær grænse og uden for område
+- Baggrunds-tracking via Android foreground service
+- Check-in/check-ud flow (kun events med checkin aktiveret)
 
 ### Kalender
-- Maanedsvisning med event-markorer
-- Event-kort med titel, beskrivelse, tid, omraade
-- Tilmeld/Afmeld knapper for medlemmer og admins
-- Deltager-antal og navne synlige paa hvert event
-- "Poster" knap til taarn-reservation naar event har omraade
+- Månedsvisning med event-markører
+- Event-kort med titel, beskrivelse, tid, område
+- Tilmeld/Afmeld knapper
+- Deltager-antal og navne synlige
+- Poster-knap til tårn-reservation
 
-### Taarn-reservation
-- Kort med farvekodede taarne (groen=ledig, roed=optaget, blaa=din)
+### Tårn-reservation
+- Kort med farvekodede tårne (grøn=ledig, rød=optaget, blå=din)
 - Reserver/annuller poster pr. event
-- Admin kan se hvem der har reserveret og annullere
+- Admin kan se og annullere reservationer
 
 ### Chat
-- Kanal-baseret chat med realtime (Supabase Realtime)
-- Admin kan oprette kanaler
+- Kanal-baseret chat med realtime (Supabase Realtime + polling fallback)
+- Tekst, billeder og video
+- Billede fra galleri eller kamera
+- Video fra galleri eller optag direkte
+- Admin kan slette enkeltstående beskeder (long-press)
+- Push notifikationer ved nye beskeder (Android)
+- Generelle kanaler (synlige for alle) og private/gruppe kanaler
 
 ### Notifikationer
 - In-app notifikationer med realtime-opdatering
-- Ulaesteantal paa klokke-ikon
-- Marker alle laest
-- Broadcast til alle medlemmer (fra admin) med valgfri event-tilknytning og tidsplanlaegning
+- FCM push notifikationer (Android)
+- Ulæsteantal på klokke-ikon
+- Marker alle læst
+- Push ved chat-beskeder, broadcasts og events
 
 ### Admin Panel
-- **Jagtomraader**: opret og administrer omraader med kort, radius, alarm-tekst
-- **Brugere**: se alle brugere, aendr roller (gaest/medlem/admin)
-- **Broadcast**: send besked til alle, valgfrit tilknyt event, planlaeg tidspunkt
-- **Admin Log**: komplet aktivitetslog med 11 farvekodede typer
-
-### Admin Log typer
-| Type | Ikon | Beskrivelse |
-|------|------|-------------|
-| new_user | Blaa | Ny bruger oprettet |
-| event_signup | Groen | Medlem tilmeldt event |
-| event_unsignup | Orange | Medlem afmeldt event |
-| geofence_warning | Gul | Naer jagtomraadets graense |
-| geofence_outside | Roed | Uden for jagtomraadet |
-| reservation | Lilla | Taarn reserveret |
-| reservation_cancel | Lilla lys | Reservation annulleret |
-| event_created | Teal | Nyt event oprettet |
-| area_created | Moerkegroen | Nyt jagtomraade oprettet |
-| broadcast | Indigo | Broadcast sendt |
-| role_change | Dyb orange | Brugerrolle aendret |
+- **Jagtområder**: opret og administrer områder med polygon-grænser
+- **Tårne/poster**: opret med beskrivelse, type og billeder
+- **Brugere**: se alle brugere, ændr roller (gæst/medlem/admin)
+- **Chat kanaler**: administrer kanaler
+- **Broadcast**: send besked til alle
+- **Events**: opret/rediger med check-in/ud toggle
+- **Forside**: rediger forsideblokke
+- **Roller**: administrer tilgængelige roller
+- **Admin Log**: komplet aktivitetslog
 
 ### Profil
 - Vis navn, email, rolle
 - Rediger visningsnavn
-- Admin panel (kun admin)
+- Admin panel adgang (kun admin)
 - Log ud
 
+### Auto-opdatering
+- App tjekker GitHub Releases ved opstart
+- Viser dialog hvis nyere version findes
+- Download og installer direkte fra appen
+
 ## Roller
-- **Guest**: kan se kort og jagtomraader
-- **Member**: kan tilmelde events, reservere poster, chatte, modtage notifikationer
-- **Admin**: alt ovenfor + opret events/omraader, administrer brugere, send broadcast, se admin log
+- **Gæst**: kan se kort og jagtområder
+- **Medlem**: kan tilmelde events, reservere poster, chatte, modtage notifikationer
+- **Admin**: alt ovenstående + opret events/områder, administrer brugere, send broadcast, se admin log
 
 ## Tech stack
-- Flutter 3.x med Riverpod 3 (AsyncNotifier)
-- Supabase (Auth, PostgreSQL, Realtime)
+- Flutter 3.41.5 med Riverpod 3 (AsyncNotifier)
+- Supabase (Auth, PostgreSQL, Realtime, Storage, Edge Functions)
+- Firebase (Push notifikationer, Hosting)
 - GoRouter med auth redirect
 - flutter_map + OpenStreetMap
-- Geolocator (GPS tracking) + Android Foreground Service
-- flutter_local_notifications
-- table_calendar
+- Geolocator + Android Foreground Service
+- image_picker + video_player
 - Package: dk.jagtapp.jagt_app
 
-## Build
-```bash
-flutter build apk --release
-```
-Kraever JDK 17 (gradle.properties: org.gradle.java.home=/home/ex/jdk17)
+## Platforme
+- **Android**: APK distribution via GitHub Releases med auto-opdatering
+- **Web**: Firebase Hosting (uden GPS, geofencing og push)
 
-## Supabase SQL
-Koer i raekkefoelge:
-1. `supabase/notifications.sql`
-2. `supabase/event_signups_and_log.sql`
-3. `supabase/fix_dummy_data.sql` (testdata)
+## CI/CD
+GitHub Actions bygger og deployer automatisk ved push til `main`:
+1. Bygger Android APK med release-signing
+2. Bygger Flutter web
+3. Deployer web til Firebase Hosting
+4. Opretter GitHub Release med APK
+
+## Lokal udvikling
+```bash
+# Byg APK
+JAVA_HOME=/path/to/jdk17 flutter build apk --release
+
+# Byg og deploy web
+flutter build web --release
+firebase deploy --only hosting
+```
 
 ## Versionshistorik
 
+### v2.3.1 (2026-05-22)
+- Auto-opdatering via GitHub Releases
+- CI/CD pipeline med GitHub Actions
+- Release-signing af APK
+
+### v2.3.0 (2026-05-21)
+- Admin kan slette individuelle chat-beskeder (long-press)
+- Video-optagelse direkte fra chat (kamera)
+- Check-in/check-ud toggle på events
+- Chat RLS fix med SECURITY DEFINER funktion
+
+### v2.0.0 (2026-05-20)
+- Web version (Firebase Hosting)
+- Medie-support i chat (billeder og video)
+- Tårn-billeder og beskrivelser
+- Tårninfo på kort (uden event-data)
+- Push notifikationer (FCM)
+- Forbedret chat realtime med polling fallback
+
+### v1.9.x (2026-05-13-19)
+- Dynamisk forside med blokke
+- Rollebaseret kanalvisning
+- Polygon-baserede jagtområder
+- Push notifikationer opsætning
+- Admin log udvidelser
+
 ### v1.5.0 (2026-05-12)
-- Baggrunds-geofencing via Android foreground service
+- Baggrunds-geofencing via foreground service
 - Event tilmelding/afmelding med realtime
-- Smart geofencing (kun tilmeldte events paa eventdagen)
-- Admin log med 11 typer + dedicated log-side
-- Broadcast-side med event-tilknytning og tidsplanlaegning
-- Admin panel: 4 menupunkter
+- Smart geofencing (kun tilmeldte events)
+- Admin log med farvekodede typer
+- Broadcast med event-tilknytning
 
-### v1.3.0 (2026-05-11/12)
-- Taarn-reservation med farvekodede kort
-- In-app notifikationer med realtime
-- Broadcast fra admin
-- Geofencing med alarm-tekst og margin
-- Logo i AppBar
-
-### v1.0.0
-- Kort med jagtomraader
+### v1.0.0 (2026-05-10)
+- Kort med jagtområder og tårn-markører
 - Kalender med events
 - Chat med kanaler
-- Brugerroller (guest/member/admin)
-- Profil med admin panel
-
-## Hvad er faerdigt
-- [x] Kort med jagtomraader og taarn-markorer
-- [x] GPS tracking med geofencing
-- [x] Baggrunds-tracking (foreground service)
-- [x] Smart geofencing (kun tilmeldte events)
-- [x] Kalender med events
-- [x] Event tilmelding/afmelding
-- [x] Taarn/post-reservation pr. event
-- [x] Chat med kanaler (realtime)
-- [x] In-app notifikationer (realtime)
-- [x] Broadcast med event-tilknytning og tidsplanlaegning
-- [x] Admin log (11 typer, logges automatisk)
-- [x] Admin panel (omraader, brugere, broadcast, log)
-- [x] Rollebaseret adgang (guest/member/admin)
-- [x] Profil med navneredigering
-- [x] Logo og branding
-
-## Hvad mangler
-- [ ] FCM push notifikationer (server-push naar appen er lukket) — kraever Firebase-projekt
-- [ ] iOS konfiguration og test — kraever macOS + Xcode + Apple Developer konto
-- [ ] Email-bekraeftelse toggle — slaa fra i Supabase Dashboard > Authentication > Providers > Email
-
-## Naeste skridt
-1. **FCM push**: Opret Firebase-projekt, hent google-services.json, integrer firebase_messaging
-2. **iOS**: Konfigurer Xcode-projekt, tilfoej APNs certifikat, test paa fysisk enhed
-3. **Produktion**: Signing key, Play Store / TestFlight distribution
-4. **Nice-to-have**: Billedupload i chat, event-redigering, statistik-dashboard for admin
+- Brugerroller og profil
+- Admin panel
