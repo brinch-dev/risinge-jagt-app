@@ -6,6 +6,7 @@ import 'package:jagt_app/providers/auth_provider.dart';
 import 'package:jagt_app/models/user_profile.dart';
 import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:jagt_app/services/push_notification_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -114,6 +115,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
         ],
+        const SizedBox(height: 32),
+        FutureBuilder<PackageInfo>(
+          future: PackageInfo.fromPlatform(),
+          builder: (context, snapshot) {
+            final version = snapshot.data?.version ?? '';
+            final build = snapshot.data?.buildNumber ?? '';
+            return Center(
+              child: Text(
+                'Version $version ($build)',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+              ),
+            );
+          },
+        ),
       ],
     );
   }
