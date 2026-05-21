@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppUpdateService {
   static const _repo = 'brinch-dev/risinge-jagt-app';
@@ -120,15 +121,39 @@ class AppUpdateService {
       await file.writeAsBytes(response.bodyBytes);
 
       overlay.remove();
-      await OpenFilex.open(filePath, type: 'application/vnd.android.package-archive');
+      final result = await OpenFilex.open(filePath, type: 'application/vnd.android.package-archive');
+      if (result.type != ResultType.done && context.mounted) {
+        _offerBrowserFallback(context, downloadUrl);
+      }
     } catch (e) {
       overlay.remove();
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Opdatering fejlede: $e'), backgroundColor: Colors.red),
-        );
+        _offerBrowserFallback(context, downloadUrl);
       }
     }
+  }
+
+  static void _offerBrowserFallback(BuildContext context, String downloadUrl) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Installation fejlede'),
+        content: const Text('Vil du åbne download-linket i browseren i stedet?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuller'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              launchUrl(Uri.parse(downloadUrl), mode: LaunchMode.externalApplication);
+            },
+            child: const Text('Åbn i browser'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
