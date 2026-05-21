@@ -6,42 +6,62 @@ import 'package:http/http.dart' as http;
 import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AppUpdateService {
-  static const _bucket = 'app-releases';
-  static const _versionFile = 'version.json';
+  static const _repo = 'brinch-dev/risinge-jagt-app';
+  static const _apiUrl = 'https://api.github.com/repos/$_repo/releases/latest';
 
   static Future<void> checkForUpdate(BuildContext context) async {
     if (kIsWeb) return;
 
     try {
-      final client = Supabase.instance.client;
-      final url = client.storage.from(_bucket).getPublicUrl(_versionFile);
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(
+        Uri.parse(_apiUrl),
+        headers: {'Accept': 'application/vnd.github.v3+json'},
+      );
       if (response.statusCode != 200) return;
 
-      final remote = jsonDecode(response.body) as Map<String, dynamic>;
-      final remoteBuild = remote['build'] as int;
-      final remoteVersion = remote['version'] as String;
-      final apkFileName = remote['apk_file'] as String;
-      final releaseNotes = remote['release_notes'] as String? ?? '';
+      final release = jsonDecode(response.body) as Map<String, dynamic>;
+      final tagName = release['tag_name'] as String;
+      final remoteVersion = tagName.replaceFirst('v', '');
+      final releaseNotes = release['body'] as String? ?? '';
+
+      final assets = release['assets'] as List;
+      final apkAsset = assets.cast<Map<String, dynamic>>().firstWhere(
+            (a) => (a['name'] as String).endsWith('.apk'),
+            orElse: () => <String, dynamic>{},
+          );
+      if (apkAsset.isEmpty) return;
+
+      final downloadUrl = apkAsset['browser_download_url'] as String;
 
       final packageInfo = await PackageInfo.fromPlatform();
-      final currentBuild = int.tryParse(packageInfo.buildNumber) ?? 0;
+      final currentVersion = packageInfo.version;
 
-      if (remoteBuild <= currentBuild) return;
+      if (!_isNewer(remoteVersion, currentVersion)) return;
 
       if (!context.mounted) return;
-      _showUpdateDialog(context, remoteVersion, releaseNotes, apkFileName);
+      _showUpdateDialog(context, remoteVersion, releaseNotes, downloadUrl);
     } catch (_) {}
+  }
+
+  static bool _isNewer(String remote, String current) {
+    final r = remote.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    final c = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    for (var i = 0; i < 3; i++) {
+      final rv = i < r.length ? r[i] : 0;
+      final cv = i < c.length ? c[i] : 0;
+      if (rv > cv) return true;
+      if (rv < cv) return false;
+    }
+    return false;
   }
 
   static void _showUpdateDialog(
     BuildContext context,
     String version,
     String releaseNotes,
-    String apkFileName,
+    String downloadUrl,
   ) {
     showDialog(
       context: context,
@@ -56,7 +76,9 @@ class AppUpdateService {
             if (releaseNotes.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                releaseNotes,
+                releaseNotes.length > 200
+                    ? '${releaseNotes.substring(0, 200)}...'
+                    : releaseNotes,
                 style: const TextStyle(fontSize: 13, color: Colors.grey),
               ),
             ],
@@ -70,7 +92,7 @@ class AppUpdateService {
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
-              _downloadAndInstall(context, apkFileName);
+              _downloadAndInstall(context, downloadUrl);
             },
             child: const Text('Opdater nu'),
           ),
@@ -81,7 +103,7 @@ class AppUpdateService {
 
   static Future<void> _downloadAndInstall(
     BuildContext context,
-    String apkFileName,
+    String downloadUrl,
   ) async {
     final overlay = OverlayEntry(
       builder: (ctx) => const _DownloadOverlay(),
@@ -89,9 +111,7 @@ class AppUpdateService {
     Overlay.of(context).insert(overlay);
 
     try {
-      final client = Supabase.instance.client;
-      final url = client.storage.from(_bucket).getPublicUrl(apkFileName);
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(downloadUrl));
       if (response.statusCode != 200) throw Exception('Download fejlede');
 
       final dir = await getExternalCacheDirectories();
