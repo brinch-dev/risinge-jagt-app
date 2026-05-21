@@ -1,0 +1,192 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:jagt_app/providers/auth_provider.dart';
+import 'package:jagt_app/models/user_profile.dart';
+import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
+import 'package:jagt_app/services/push_notification_service.dart';
+
+class ProfilePage extends ConsumerStatefulWidget {
+  const ProfilePage({Key? key}) : super(key: key);
+
+  @override
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  @override
+  Widget build(BuildContext context) {
+    final profileAsync = ref.watch(userProfileProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Image.asset('assets/images/logo.png', height: 36),
+            const SizedBox(width: 10),
+            const Text('Profil'),
+          ],
+        ),
+        actions: [
+          const NotificationBell(),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              if (!kIsWeb) await PushNotificationService().removeToken();
+              final authService = ref.read(authServiceProvider);
+              await authService.signOut();
+              if (mounted) context.go('/login');
+            },
+          ),
+        ],
+      ),
+      body: profileAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Fejl: $e')),
+        data: (profile) {
+          if (profile == null) {
+            return const Center(child: Text('Profil ikke fundet'));
+          }
+          return _buildProfile(profile);
+        },
+      ),
+    );
+  }
+
+  Widget _buildProfile(UserProfile profile) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Center(
+          child: CircleAvatar(
+            radius: 50,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            child: Text(
+              profile.displayName.isNotEmpty
+                  ? profile.displayName[0].toUpperCase()
+                  : '?',
+              style: const TextStyle(fontSize: 36),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Center(
+          child: Text(
+            profile.displayName,
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Center(
+          child: Text(
+            profile.email,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey,
+                ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: Chip(
+            label: Text(profile.role.label),
+            avatar: Icon(_roleIcon(profile.role), size: 18),
+            backgroundColor: _roleColor(profile.role),
+          ),
+        ),
+        const SizedBox(height: 32),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.edit),
+            title: const Text('Rediger navn'),
+            onTap: () => _editName(profile),
+          ),
+        ),
+        if (profile.isAdmin) ...[
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text('Admin panel'),
+              subtitle: const Text('Administrer områder og brugere'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/admin'),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  IconData _roleIcon(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return Icons.shield;
+      case UserRole.jaegerMedlem:
+        return Icons.person;
+      case UserRole.ejer:
+        return Icons.home;
+      case UserRole.forvalter:
+        return Icons.manage_accounts;
+      case UserRole.bbDirektoer:
+        return Icons.hotel;
+      case UserRole.jagtGaest:
+        return Icons.nature_people;
+      case UserRole.gaest:
+        return Icons.person_outline;
+    }
+  }
+
+  Color _roleColor(UserRole role) {
+    switch (role) {
+      case UserRole.admin:
+        return Colors.amber.shade100;
+      case UserRole.jaegerMedlem:
+        return Colors.green.shade100;
+      case UserRole.ejer:
+        return Colors.purple.shade100;
+      case UserRole.forvalter:
+        return Colors.blue.shade100;
+      case UserRole.bbDirektoer:
+        return Colors.orange.shade100;
+      case UserRole.jagtGaest:
+        return Colors.teal.shade100;
+      case UserRole.gaest:
+        return Colors.grey.shade200;
+    }
+  }
+
+  void _editName(UserProfile profile) {
+    final controller = TextEditingController(text: profile.displayName);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rediger navn'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Navn',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuller'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              if (controller.text.isNotEmpty) {
+                await ref
+                    .read(userProfileProvider.notifier)
+                    .updateProfile(displayName: controller.text.trim());
+                if (ctx.mounted) Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Gem'),
+          ),
+        ],
+      ),
+    );
+  }
+}
