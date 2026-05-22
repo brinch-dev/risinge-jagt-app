@@ -9,6 +9,8 @@ import 'package:jagt_app/features/chat/presentation/pages/chat_list_page.dart';
 import 'package:jagt_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:jagt_app/services/app_update_service.dart';
 
+final tabIndexProvider = StateProvider<int>((ref) => 0);
+
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({Key? key}) : super(key: key);
 
@@ -17,7 +19,6 @@ class HomeShell extends ConsumerStatefulWidget {
 }
 
 class _HomeShellState extends ConsumerState<HomeShell> {
-  int _currentIndex = 0;
   bool _updateChecked = false;
 
   @override
@@ -28,6 +29,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     }
 
     final profileAsync = ref.watch(userProfileProvider);
+    final currentIndex = ref.watch(tabIndexProvider);
 
     return profileAsync.when(
       loading: () => const Scaffold(
@@ -44,7 +46,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         }
 
         final tabs = _buildTabs(profile);
-        final safeIndex = _currentIndex.clamp(0, tabs.length - 1);
+        final safeIndex = currentIndex.clamp(0, tabs.length - 1);
 
         return Scaffold(
           body: IndexedStack(
@@ -53,7 +55,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           ),
           bottomNavigationBar: NavigationBar(
             selectedIndex: safeIndex,
-            onDestinationSelected: (i) => setState(() => _currentIndex = i),
+            onDestinationSelected: (i) =>
+                ref.read(tabIndexProvider.notifier).state = i,
             destinations: tabs
                 .map((t) => NavigationDestination(
                       icon: Icon(t.icon),

@@ -10,6 +10,7 @@ import 'package:jagt_app/providers/event_provider.dart';
 import 'package:jagt_app/providers/event_signup_provider.dart';
 import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:jagt_app/features/admin/presentation/pages/manage_homepage_page.dart';
+import 'package:jagt_app/features/home/home_shell.dart';
 import 'package:jagt_app/bootstrap.dart';
 
 final _weatherProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
@@ -167,6 +168,10 @@ class HomePage extends ConsumerWidget {
     );
   }
 
+  void _goToTab(WidgetRef ref, int index) {
+    ref.read(tabIndexProvider.notifier).state = index;
+  }
+
   Widget _buildBlock(BuildContext context, WidgetRef ref, HomeBlock block,
       String userName, bool isAdmin, String userRole) {
     switch (block.blockType) {
@@ -175,17 +180,32 @@ class HomePage extends ConsumerWidget {
       case 'info_cards':
         return const SizedBox.shrink();
       case 'next_event':
-        return _NextEventBlock(ref: ref);
+        return GestureDetector(
+          onTap: () => _goToTab(ref, 2),
+          child: _NextEventBlock(ref: ref),
+        );
       case 'event_stats':
-        return _EventStatsBlock(ref: ref);
+        return GestureDetector(
+          onTap: () => _goToTab(ref, 2),
+          child: _EventStatsBlock(ref: ref),
+        );
       case 'weather':
         return _WeatherBlock(ref: ref);
       case 'my_reservations':
-        return _MyReservationsBlock(ref: ref);
+        return GestureDetector(
+          onTap: () => _goToTab(ref, 1),
+          child: _MyReservationsBlock(ref: ref),
+        );
       case 'recent_chat':
-        return _RecentChatBlock(ref: ref);
+        return GestureDetector(
+          onTap: () => _goToTab(ref, 3),
+          child: _RecentChatBlock(ref: ref),
+        );
       case 'countdown':
-        return _CountdownBlock(ref: ref);
+        return GestureDetector(
+          onTap: () => _goToTab(ref, 2),
+          child: _CountdownBlock(ref: ref),
+        );
       case 'text':
         return _TextBlock(block: block);
       case 'announcement':
