@@ -1,6 +1,6 @@
 # Risinge Jagtvæsen — App Dokumentation
 
-**Version:** 2.3.8
+**Version:** 2.4.0
 **Opdateret:** 2026-05-22
 **Platforme:** Android (APK) + Web (Firebase Hosting)
 **Backend:** Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)
@@ -191,7 +191,7 @@ GitHub Actions bygger og deployer automatisk ved push til `main`:
 2. Bygger Android APK med release-signering
 3. Bygger Flutter web
 4. Deployer web til Firebase Hosting
-5. Opretter GitHub Release med APK
+5. Opretter GitHub Release med APsK
 
 ### Release-signering
 - Keystore: `android/app/upload-keystore.jks`
