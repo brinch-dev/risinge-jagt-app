@@ -218,26 +218,26 @@ class _WelcomeBlock extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1B3A1B),
+                color: Colors.black,
               ),
             ),
             const SizedBox(height: 4),
           ],
           Text(
             block.title ?? 'Velkommen',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Colors.grey.shade700,
+              color: Color(0xFF333333),
             ),
           ),
           if (block.content != null && block.content!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
               block.content!,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: Color(0xFF555555),
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -306,8 +306,10 @@ class _NextEventBlock extends StatelessWidget {
     final event = upcoming.isNotEmpty ? upcoming.first : null;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Card(
+        color: const Color(0xFF1A1A1A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -315,11 +317,11 @@ class _NextEventBlock extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2E7D32).withValues(alpha: 0.12),
+                  color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.calendar_month,
-                    color: Color(0xFF2E7D32), size: 28),
+                    color: Colors.white, size: 28),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -327,26 +329,29 @@ class _NextEventBlock extends StatelessWidget {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Næste event',
+                          const Text('NÆSTE EVENT',
                               style: TextStyle(
-                                  fontSize: 12, color: Colors.grey.shade600)),
-                          const SizedBox(height: 2),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF999999),
+                                  letterSpacing: 1.2)),
+                          const SizedBox(height: 4),
                           Text(event.title,
                               style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1B1B1B))),
+                                  color: Colors.white)),
                           const SizedBox(height: 2),
                           Text(
                             '${DateFormat('EEEE d. MMM', 'da').format(event.date)}'
                             '${event.startTime != null ? ' kl. ${event.startTime}' : ''}',
                             style: const TextStyle(
-                                fontSize: 13, color: Color(0xFF444444)),
+                                fontSize: 13, color: Color(0xFFBBBBBB)),
                           ),
                         ],
                       )
                     : const Text('Ingen kommende events',
-                        style: TextStyle(fontSize: 15, color: Color(0xFF666666))),
+                        style: TextStyle(fontSize: 15, color: Color(0xFF888888))),
               ),
             ],
           ),
@@ -369,13 +374,47 @@ class _EventStatsBlock extends StatelessWidget {
     final totalAttending = signups.where((s) => s.isAttending).length;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: _InfoCard(
-        icon: Icons.people,
-        iconColor: const Color(0xFFC75B39),
-        title: 'Events',
-        value: '${upcoming.length} kommende',
-        subtitle: upcoming.isNotEmpty ? '$totalAttending tilmeldte' : null,
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        color: const Color(0xFF1A1A1A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.people, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('EVENTS',
+                      style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF999999),
+                          letterSpacing: 1.2)),
+                  const SizedBox(height: 4),
+                  Text('${upcoming.length} kommende',
+                      style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white)),
+                  if (upcoming.isNotEmpty)
+                    Text('$totalAttending tilmeldte',
+                        style: const TextStyle(
+                            fontSize: 13, color: Color(0xFFBBBBBB))),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -466,8 +505,10 @@ class _WeatherBlock extends StatelessWidget {
         final label = _weatherLabels[code] ?? 'Ukendt';
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 12),
           child: Card(
+            color: const Color(0xFF1A1A1A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -475,7 +516,7 @@ class _WeatherBlock extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(icon, size: 36, color: const Color(0xFF1565C0)),
+                      Icon(icon, size: 36, color: Colors.white),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
@@ -485,17 +526,17 @@ class _WeatherBlock extends StatelessWidget {
                                 style: const TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1B1B1B))),
+                                    color: Colors.white)),
                             const SizedBox(height: 2),
                             const Text('Risinge Herregaard',
                                 style: TextStyle(
-                                    fontSize: 12, color: Color(0xFF666666))),
+                                    fontSize: 12, color: Color(0xFF999999))),
                           ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -536,12 +577,12 @@ class _WeatherDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF1565C0)),
+        Icon(icon, size: 18, color: const Color(0xFF999999)),
         const SizedBox(height: 4),
         Text(value,
             style: const TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1B1B1B))),
-        Text(label, style: const TextStyle(fontSize: 10, color: Color(0xFF666666))),
+                fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+        Text(label, style: const TextStyle(fontSize: 10, color: Color(0xFF888888))),
       ],
     );
   }
@@ -563,17 +604,18 @@ class _MyReservationsBlock extends StatelessWidget {
       data: (reservations) {
         if (reservations.isEmpty) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.only(bottom: 12),
             child: Card(
-              color: Colors.grey.shade50,
+              color: const Color(0xFF1A1A1A),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               child: const Padding(
                 padding: EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.location_on_outlined, color: Colors.grey),
+                    Icon(Icons.location_on_outlined, color: Color(0xFF666666)),
                     SizedBox(width: 12),
                     Text('Ingen kommende reservationer',
-                        style: TextStyle(color: Colors.grey)),
+                        style: TextStyle(color: Color(0xFF888888))),
                   ],
                 ),
               ),
@@ -582,25 +624,28 @@ class _MyReservationsBlock extends StatelessWidget {
         }
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 12),
           child: Card(
+            color: const Color(0xFF1A1A1A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     children: [
-                      Icon(Icons.location_on,
-                          color: Colors.deepPurple.shade700, size: 20),
-                      const SizedBox(width: 8),
-                      Text('Dine reservationer',
+                      Icon(Icons.location_on, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text('DINE RESERVATIONER',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepPurple.shade800)),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF999999),
+                              letterSpacing: 1.2)),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   ...reservations.take(3).map((r) {
                     final tower = r['towers'] as Map<String, dynamic>?;
                     final event = r['hunt_events'] as Map<String, dynamic>?;
@@ -608,14 +653,14 @@ class _MyReservationsBlock extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 6),
                       child: Row(
                         children: [
-                          Icon(Icons.chevron_right,
-                              size: 16, color: Colors.deepPurple.shade400),
+                          const Icon(Icons.chevron_right,
+                              size: 16, color: Color(0xFF888888)),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               '${tower?['name'] ?? '?'} — ${event?['title'] ?? '?'}',
                               style: const TextStyle(
-                                  fontSize: 14, color: Color(0xFF1B1B1B)),
+                                  fontSize: 14, color: Colors.white),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -625,7 +670,7 @@ class _MyReservationsBlock extends StatelessWidget {
                               DateFormat('d/M').format(
                                   DateTime.parse(event!['date'] as String)),
                               style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFF555555)),
+                                  fontSize: 12, color: Color(0xFFBBBBBB)),
                             ),
                         ],
                       ),
@@ -634,8 +679,8 @@ class _MyReservationsBlock extends StatelessWidget {
                   if (reservations.length > 3)
                     Text(
                       '+${reservations.length - 3} mere',
-                      style: TextStyle(
-                          fontSize: 12, color: Colors.deepPurple.shade600),
+                      style: const TextStyle(
+                          fontSize: 12, color: Color(0xFF999999)),
                     ),
                 ],
               ),
@@ -664,25 +709,29 @@ class _RecentChatBlock extends StatelessWidget {
         if (messages.isEmpty) return const SizedBox.shrink();
 
         return Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 12),
           child: Card(
+            color: const Color(0xFF1A1A1A),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  const Row(
                     children: [
                       Icon(Icons.chat_bubble_outline,
-                          color: Colors.teal.shade700, size: 20),
-                      const SizedBox(width: 8),
-                      Text('Seneste beskeder',
+                          color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text('SENESTE BESKEDER',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.teal.shade800)),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF999999),
+                              letterSpacing: 1.2)),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   ...messages.take(4).map((m) {
                     final sender =
                         m['profiles'] as Map<String, dynamic>?;
@@ -705,10 +754,10 @@ class _RecentChatBlock extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 14,
-                            backgroundColor: Colors.teal.shade100,
+                            backgroundColor: const Color(0xFF333333),
                             child: Text(name[0].toUpperCase(),
-                                style: TextStyle(
-                                    fontSize: 11, color: Colors.teal.shade800)),
+                                style: const TextStyle(
+                                    fontSize: 11, color: Colors.white)),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -721,17 +770,17 @@ class _RecentChatBlock extends StatelessWidget {
                                         style: const TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
-                                            color: Color(0xFF1B1B1B))),
+                                            color: Colors.white)),
                                     if (channelName.isNotEmpty) ...[
                                       const Text(' i ',
                                           style: TextStyle(
                                               fontSize: 11,
-                                              color: Color(0xFF666666))),
+                                              color: Color(0xFF888888))),
                                       Flexible(
                                         child: Text(channelName,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                                 fontSize: 11,
-                                                color: Colors.teal.shade700),
+                                                color: Color(0xFFBBBBBB)),
                                             overflow: TextOverflow.ellipsis),
                                       ),
                                     ],
@@ -741,7 +790,7 @@ class _RecentChatBlock extends StatelessWidget {
                                   content,
                                   style: const TextStyle(
                                       fontSize: 13,
-                                      color: Color(0xFF444444)),
+                                      color: Color(0xFFAAAAAA)),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -752,7 +801,7 @@ class _RecentChatBlock extends StatelessWidget {
                             Text(
                               DateFormat('HH:mm').format(time.toLocal()),
                               style: const TextStyle(
-                                  fontSize: 10, color: Color(0xFF777777)),
+                                  fontSize: 10, color: Color(0xFF888888)),
                             ),
                         ],
                       ),
@@ -794,8 +843,13 @@ class _CountdownBlock extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Card(
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: Colors.black, width: 2),
+        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           child: Row(
@@ -804,16 +858,14 @@ class _CountdownBlock extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: diff.inDays <= 1
-                      ? const Color(0xFFE65100)
-                      : const Color(0xFF283593),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   countdownText,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w900,
                     fontSize: 18,
                   ),
                 ),
@@ -825,13 +877,13 @@ class _CountdownBlock extends StatelessWidget {
                   children: [
                     Text(event.title,
                         style: const TextStyle(
-                            fontSize: 15,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1B1B1B))),
+                            color: Colors.black)),
                     Text(
                       DateFormat('EEEE d. MMMM', 'da').format(event.date),
                       style:
-                          const TextStyle(fontSize: 13, color: Color(0xFF555555)),
+                          const TextStyle(fontSize: 13, color: Color(0xFF444444)),
                     ),
                   ],
                 ),
@@ -858,6 +910,11 @@ class _TextBlock extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Card(
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: Colors.grey.shade300),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -870,7 +927,7 @@ class _TextBlock extends StatelessWidget {
                     block.title!,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF3E2723),
+                      color: Colors.black,
                       fontSize: 16,
                     ),
                   ),
@@ -878,7 +935,7 @@ class _TextBlock extends StatelessWidget {
               Text(
                 block.content!,
                 style: const TextStyle(
-                  color: Color(0xFF1B1B1B),
+                  color: Color(0xFF333333),
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -902,12 +959,14 @@ class _AnnouncementBlock extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Card(
+        color: const Color(0xFF1A1A1A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.campaign, color: Color(0xFFE65100), size: 24),
+              const Icon(Icons.campaign, color: Colors.white, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -918,7 +977,7 @@ class _AnnouncementBlock extends StatelessWidget {
                         block.title!,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1B1B1B),
+                          color: Colors.white,
                           fontSize: 15,
                         ),
                       ),
@@ -928,7 +987,7 @@ class _AnnouncementBlock extends StatelessWidget {
                       Text(
                         block.content!,
                         style: const TextStyle(
-                          color: Color(0xFF333333),
+                          color: Color(0xFFCCCCCC),
                           fontSize: 14,
                           height: 1.4,
                         ),
@@ -1014,6 +1073,8 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: const Color(0xFF1A1A1A),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -1024,18 +1085,19 @@ class _InfoCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: iconColor.withValues(alpha: 0.12),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(icon, color: iconColor, size: 18),
+                  child: Icon(icon, color: Colors.white, size: 18),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF555555),
-                    fontWeight: FontWeight.w500,
+                    fontSize: 11,
+                    color: Color(0xFF999999),
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.8,
                   ),
                 ),
               ],
@@ -1044,7 +1106,7 @@ class _InfoCard extends StatelessWidget {
             Text(
               value,
               style:
-                  const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1B1B1B)),
+                  const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -1052,7 +1114,7 @@ class _InfoCard extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle!,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                style: const TextStyle(fontSize: 12, color: Color(0xFFBBBBBB)),
               ),
             ],
           ],
