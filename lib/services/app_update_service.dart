@@ -74,7 +74,7 @@ class AppUpdateService {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: const Text('Ny version tilgaengelig'),
+        title: const Text('Ny version tilgængelig'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,16 +124,31 @@ class AppUpdateService {
     Overlay.of(context).insert(overlay);
 
     try {
-      final response = await http.get(Uri.parse(downloadUrl));
-      if (response.statusCode != 200) throw Exception('Download fejlede');
-
-      final dir = await getExternalCacheDirectories();
-      final filePath = '${dir!.first.path}/jagt-app-update.apk';
+      final dir = await getTemporaryDirectory();
+      final filePath = '${dir.path}/jagt-app-update.apk';
       final file = File(filePath);
-      await file.writeAsBytes(response.bodyBytes);
+
+      if (await file.exists()) await file.delete();
+
+      final client = http.Client();
+      final request = http.Request('GET', Uri.parse(downloadUrl));
+      final streamedResponse = await client.send(request);
+      if (streamedResponse.statusCode != 200) throw Exception('Download fejlede');
+
+      final sink = file.openWrite();
+      await streamedResponse.stream.pipe(sink);
+      await sink.close();
+      client.close();
+
+      final fileSize = await file.length();
+      if (fileSize < 1000000) throw Exception('APK for lille');
 
       overlay.remove();
-      final result = await OpenFilex.open(filePath, type: 'application/vnd.android.package-archive');
+
+      final result = await OpenFilex.open(
+        filePath,
+        type: 'application/vnd.android.package-archive',
+      );
       if (result.type != ResultType.done && context.mounted) {
         _offerBrowserFallback(context, downloadUrl);
       }
