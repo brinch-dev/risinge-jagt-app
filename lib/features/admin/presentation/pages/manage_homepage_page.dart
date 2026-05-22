@@ -14,6 +14,12 @@ const _blockTypeLabels = {
   'text': 'Tekst',
   'announcement': 'Meddelelse',
   'image': 'Billede',
+  'next_event': 'Næste event',
+  'event_stats': 'Event-statistik',
+  'weather': 'Vejrudsigt',
+  'my_reservations': 'Mine reservationer',
+  'recent_chat': 'Seneste chat',
+  'countdown': 'Nedtælling',
 };
 
 const _blockTypeIcons = {
@@ -23,6 +29,12 @@ const _blockTypeIcons = {
   'text': Icons.article,
   'announcement': Icons.campaign,
   'image': Icons.photo,
+  'next_event': Icons.event,
+  'event_stats': Icons.bar_chart,
+  'weather': Icons.wb_sunny,
+  'my_reservations': Icons.bookmark,
+  'recent_chat': Icons.forum,
+  'countdown': Icons.timer,
 };
 
 class ManageHomepagePage extends ConsumerWidget {
@@ -205,8 +217,13 @@ class _EditBlockPageState extends ConsumerState<EditBlockPage> {
     super.dispose();
   }
 
+  static const _dynamicTypes = {
+    'next_event', 'event_stats', 'weather', 'my_reservations',
+    'recent_chat', 'countdown',
+  };
+
   bool get _hasTitle =>
-      _blockType != 'info_cards';
+      _blockType != 'info_cards' && !_dynamicTypes.contains(_blockType);
 
   bool get _hasContent =>
       ['welcome', 'text', 'announcement', 'hero'].contains(_blockType);
@@ -250,6 +267,29 @@ class _EditBlockPageState extends ConsumerState<EditBlockPage> {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  if (_dynamicTypes.contains(_blockType)) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.auto_awesome, size: 18, color: Colors.blue.shade700),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Denne blok genereres automatisk fra app-data. Brug synlighed nedenfor til at styre hvem der ser den.',
+                              style: TextStyle(fontSize: 13, color: Colors.blue.shade800),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   if (_hasTitle) ...[
                     TextField(
                       controller: _titleCtrl,

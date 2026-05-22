@@ -139,6 +139,25 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
+## Session 9: 2026-05-22 — v2.3.9 → v2.4.0
+
+### Chat-kanaler
+- Træk-og-slip rækkefølge for generelle chatkanaler i admin panel (ReorderableListView)
+- `sort_order` opdateres i Supabase ved genordning
+
+### Dashboard widgets
+- 6 nye bloktyper: `next_event`, `event_stats`, `weather`, `my_reservations`, `recent_chat`, `countdown`
+- Vejrudsigt via Open-Meteo API (gratis, ingen nøgle) med temperatur, vind, fugtighed, solopgang/solnedgang
+- Mine reservationer: viser brugerens kommende tårnreservationer
+- Seneste chat: viser 5 nyeste beskeder på tværs af kanaler
+- Nedtælling: "I DAG", "I MORGEN" eller "X DAGE" til næste event
+- Admin kan tilføje/fjerne/aktivere/deaktivere alle widgets via forside-editor
+- Rollebaseret synlighed via `visible_roles` på alle blokke
+- Info-kort beholdt for bagudkompatibilitet
+- Dynamiske blokke viser info-besked i admin ("genereres automatisk")
+
+---
+
 ## Kendte begrænsninger og fremtidige opgaver
 
 ### Begrænsninger

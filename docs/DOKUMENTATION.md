@@ -86,9 +86,10 @@ Roller styres dynamisk via `roles`-tabellen. Admin kan oprette, redigere og slet
 
 ### Forside
 - Dynamisk forside med konfigurerbare blokke (hero, velkomst, tekst, billede, meddelelse, info-kort)
-- Admin kan redigere forsideindhold, aktivere/deaktivere blokke, styre synlighed per rolle
+- Dashboard widgets: næste event, nedtælling, event-statistik, vejrudsigt, mine reservationer, seneste chat
+- Vejrudsigt via Open-Meteo API (temperatur, vind, fugtighed, solopgang/solnedgang)
+- Admin kan tilføje/fjerne/aktivere/deaktivere alle widgets med rollebaseret synlighed
 - Hero med gradient overlay og hvid tekst
-- Info-kort viser: næste event, antal events, chat-kanaler, jagtkort
 
 ### Kort (Jagtkort)
 - 3 kortlag: Standard (OSM), Satellit (ArcGIS), Topografisk (OpenTopo)
