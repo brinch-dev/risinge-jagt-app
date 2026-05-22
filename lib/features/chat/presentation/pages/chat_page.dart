@@ -216,7 +216,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     final messagesAsync =
         ref.watch(chatMessagesProviderFamily(widget.channelId));
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
-    final isAdmin = ref.watch(userProfileProvider).value?.role == 'admin';
+    final isAdmin = ref.watch(userProfileProvider).value?.isAdmin ?? false;
 
     return Scaffold(
       appBar: AppBar(
