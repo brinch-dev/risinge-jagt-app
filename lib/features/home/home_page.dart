@@ -169,7 +169,7 @@ class HomePage extends ConsumerWidget {
   }
 
   void _goToTab(WidgetRef ref, int index) {
-    ref.read(tabIndexProvider.notifier).state = index;
+    ref.read(tabIndexProvider.notifier).set(index);
   }
 
   Widget _buildBlock(BuildContext context, WidgetRef ref, HomeBlock block,

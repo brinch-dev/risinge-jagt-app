@@ -9,7 +9,13 @@ import 'package:jagt_app/features/chat/presentation/pages/chat_list_page.dart';
 import 'package:jagt_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:jagt_app/services/app_update_service.dart';
 
-final tabIndexProvider = StateProvider<int>((ref) => 0);
+final tabIndexProvider = NotifierProvider<TabIndexNotifier, int>(TabIndexNotifier.new);
+
+class TabIndexNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+  void set(int index) => state = index;
+}
 
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({Key? key}) : super(key: key);
@@ -56,7 +62,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           bottomNavigationBar: NavigationBar(
             selectedIndex: safeIndex,
             onDestinationSelected: (i) =>
-                ref.read(tabIndexProvider.notifier).state = i,
+                ref.read(tabIndexProvider.notifier).set(i),
             destinations: tabs
                 .map((t) => NavigationDestination(
                       icon: Icon(t.icon),
