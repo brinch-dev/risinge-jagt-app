@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.3.1
+# Risinge Jagtvæsen v2.3.7
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -62,13 +62,16 @@ Tilgængelig som Android app og web app.
 ### Profil
 - Vis navn, email, rolle
 - Rediger visningsnavn
+- Versionsnummer synligt
 - Admin panel adgang (kun admin)
 - Log ud
 
 ### Auto-opdatering
 - App tjekker GitHub Releases ved opstart
 - Viser dialog hvis nyere version findes
-- Download og installer direkte fra appen
+- Streaming download og installation direkte fra appen
+- Husker afvist version så dialogen ikke gentages
+- Browser-fallback hvis installation fejler
 
 ## Roller
 - **Gæst**: kan se kort og jagtområder
@@ -91,14 +94,14 @@ Tilgængelig som Android app og web app.
 
 ## CI/CD
 GitHub Actions bygger og deployer automatisk ved push til `main`:
-1. Bygger Android APK med release-signing
+1. Bygger Android APK med release-signering
 2. Bygger Flutter web
 3. Deployer web til Firebase Hosting
 4. Opretter GitHub Release med APK
 
 ## Lokal udvikling
 ```bash
-# Byg APK
+# Byg APK (kræver key.properties + keystore for release-signering)
 JAVA_HOME=/path/to/jdk17 flutter build apk --release
 
 # Byg og deploy web
@@ -108,10 +111,12 @@ firebase deploy --only hosting
 
 ## Versionshistorik
 
-### v2.3.1 (2026-05-22)
-- Auto-opdatering via GitHub Releases
-- CI/CD pipeline med GitHub Actions
-- Release-signing af APK
+### v2.3.7 (2026-05-22)
+- Fix release-signering (keystore-sti rettet i Gradle)
+- Streaming APK-download (undgår memory-problemer med store filer)
+- Husk afvist opdateringsversion (viser ikke dialog igen for samme version)
+- Browser-fallback ved fejlet APK-installation
+- Versionsnummer synligt på profilsiden
 
 ### v2.3.0 (2026-05-21)
 - Admin kan slette individuelle chat-beskeder (long-press)
