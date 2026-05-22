@@ -43,13 +43,29 @@ class ManageChannelsPage extends ConsumerWidget {
           if (channels.isEmpty) {
             return const Center(child: Text('Ingen kanaler'));
           }
-          return ListView.builder(
+          return ReorderableListView.builder(
             itemCount: channels.length,
             padding: const EdgeInsets.all(8),
+            onReorder: (oldIndex, newIndex) async {
+              if (newIndex > oldIndex) newIndex--;
+              if (oldIndex == newIndex) return;
+              final reordered = List<Map<String, dynamic>>.from(channels);
+              final item = reordered.removeAt(oldIndex);
+              reordered.insert(newIndex, item);
+              final client = ref.read(supabaseProvider);
+              for (var i = 0; i < reordered.length; i++) {
+                await client
+                    .from('chat_channels')
+                    .update({'sort_order': i})
+                    .eq('id', reordered[i]['id']);
+              }
+              ref.invalidate(adminChannelsProvider);
+            },
             itemBuilder: (context, index) {
               final ch = channels[index];
               final roles = List<String>.from(ch['required_roles'] ?? []);
               return Card(
+                key: ValueKey(ch['id']),
                 child: ListTile(
                   leading: Icon(
                     Icons.chat,
@@ -83,7 +99,14 @@ class ManageChannelsPage extends ConsumerWidget {
                       ],
                     ],
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.chevron_right),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.drag_handle),
+                    ],
+                  ),
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
