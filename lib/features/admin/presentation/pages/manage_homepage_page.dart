@@ -10,7 +10,6 @@ import 'package:jagt_app/providers/role_provider.dart';
 const _blockTypeLabels = {
   'hero': 'Hero billede',
   'welcome': 'Velkomsttekst',
-  'info_cards': 'Info-kort',
   'text': 'Tekst',
   'announcement': 'Meddelelse',
   'image': 'Billede',
@@ -25,7 +24,6 @@ const _blockTypeLabels = {
 const _blockTypeIcons = {
   'hero': Icons.image,
   'welcome': Icons.waving_hand,
-  'info_cards': Icons.dashboard,
   'text': Icons.article,
   'announcement': Icons.campaign,
   'image': Icons.photo,
@@ -153,7 +151,7 @@ class ManageHomepagePage extends ConsumerWidget {
       builder: (ctx) => SimpleDialog(
         title: const Text('Tilføj blok'),
         children: _blockTypeLabels.entries
-            .where((e) => e.key != 'hero' && e.key != 'info_cards')
+            .where((e) => e.key != 'hero')
             .map((e) => SimpleDialogOption(
                   onPressed: () {
                     Navigator.pop(ctx);
@@ -223,7 +221,7 @@ class _EditBlockPageState extends ConsumerState<EditBlockPage> {
   };
 
   bool get _hasTitle =>
-      _blockType != 'info_cards' && !_dynamicTypes.contains(_blockType);
+      !_dynamicTypes.contains(_blockType);
 
   bool get _hasContent =>
       ['welcome', 'text', 'announcement', 'hero'].contains(_blockType);
@@ -239,9 +237,7 @@ class _EditBlockPageState extends ConsumerState<EditBlockPage> {
       appBar: AppBar(
         title: Text(_isNew ? 'Ny $typeLabel' : 'Rediger $typeLabel'),
         actions: [
-          if (!_isNew &&
-              _blockType != 'hero' &&
-              _blockType != 'info_cards')
+          if (!_isNew && _blockType != 'hero')
             IconButton(
               icon: const Icon(Icons.delete, color: Colors.red),
               onPressed: _confirmDelete,

@@ -173,7 +173,7 @@ class HomePage extends ConsumerWidget {
       case 'welcome':
         return _WelcomeBlock(block: block, userName: userName);
       case 'info_cards':
-        return _InfoCardsBlock(ref: ref);
+        return const SizedBox.shrink();
       case 'next_event':
         return _NextEventBlock(ref: ref);
       case 'event_stats':
@@ -242,52 +242,6 @@ class _WelcomeBlock extends StatelessWidget {
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-// --- Legacy info_cards (kept for backwards compat) ---
-
-class _InfoCardsBlock extends StatelessWidget {
-  final WidgetRef ref;
-  const _InfoCardsBlock({required this.ref});
-
-  @override
-  Widget build(BuildContext context) {
-    final upcoming = ref.watch(upcomingEventsProvider);
-    final signups = ref.watch(eventSignupsProvider).value ?? [];
-    final totalAttending = signups.where((s) => s.isAttending).length;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Expanded(
-            child: _InfoCard(
-              icon: Icons.calendar_month,
-              iconColor: const Color(0xFF2E7D32),
-              title: 'Næste event',
-              value: upcoming.isNotEmpty
-                  ? upcoming.first.title
-                  : 'Ingen planlagt',
-              subtitle: upcoming.isNotEmpty
-                  ? DateFormat('d. MMM yyyy', 'da').format(upcoming.first.date)
-                  : null,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _InfoCard(
-              icon: Icons.people,
-              iconColor: const Color(0xFFC75B39),
-              title: 'Events',
-              value: '${upcoming.length} kommende',
-              subtitle:
-                  upcoming.isNotEmpty ? '$totalAttending tilmeldte' : null,
-            ),
-          ),
         ],
       ),
     );
@@ -1053,73 +1007,3 @@ class _ImageBlock extends StatelessWidget {
   }
 }
 
-// --- Info Card (reusable) ---
-
-class _InfoCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String value;
-  final String? subtitle;
-
-  const _InfoCard({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.value,
-    this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: const Color(0xFF1A1A1A),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(icon, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF999999),
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.8,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              value,
-              style:
-                  const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (subtitle != null) ...[
-              const SizedBox(height: 2),
-              Text(
-                subtitle!,
-                style: const TextStyle(fontSize: 12, color: Color(0xFFBBBBBB)),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
