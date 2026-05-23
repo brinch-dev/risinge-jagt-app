@@ -225,19 +225,32 @@ class _TowerReservationPageState extends ConsumerState<TowerReservationPage> {
       }
       final currentUserId = Supabase.instance.client.auth.currentUser?.id;
       final isSignedUp = currentUserId != null &&
-          ref.read(eventSignupsProvider.notifier).isSignedUp(
+          ref.watch(eventSignupsProvider.notifier).isSignedUp(
               widget.event.id, currentUserId);
       if (!isSignedUp) {
         return SizedBox(
           height: 32,
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.orange,
+          child: FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.orange,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               textStyle: const TextStyle(fontSize: 13),
             ),
-            onPressed: null,
-            child: const Text('Tilmeld event først'),
+            onPressed: _isLoading ? null : () async {
+              setState(() => _isLoading = true);
+              try {
+                await ref.read(eventSignupsProvider.notifier).signup(widget.event.id);
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('Fejl: $e')));
+                }
+              } finally {
+                if (mounted) setState(() => _isLoading = false);
+              }
+            },
+            icon: const Icon(Icons.check, size: 16),
+            label: const Text('Tilmeld event først'),
           ),
         );
       }

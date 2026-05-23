@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.5.2
+# Risinge Jagtvæsen v2.5.3
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -113,8 +113,8 @@ firebase deploy --only hosting
 
 ## Versionshistorik
 
-### v2.5.2 (2026-05-23)
-- Tilmeld event før reservation: "Tilmeld event først" vises hvis bruger ikke er tilmeldt
+### v2.5.3 (2026-05-23)
+- "Tilmeld event først"-knap på postsiden tilmelder direkte og skifter til "Reserver"
 - Sol op/ned og temperatur vises på event detaljesiden (live vejrdata)
 
 ### v2.5.1 (2026-05-23)
