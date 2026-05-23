@@ -140,16 +140,27 @@ class HomePage extends ConsumerWidget {
             ),
             DecoratedBox(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0x60000000),
-                    const Color(0x80000000),
-                    cs.primary.withValues(alpha: 0.93),
-                  ],
-                  stops: const [0.3, 0.6, 1.0],
-                ),
+                gradient: Theme.of(context).brightness == Brightness.dark
+                    ? LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          const Color(0x60000000),
+                          const Color(0x80000000),
+                          cs.primary.withValues(alpha: 0.93),
+                        ],
+                        stops: const [0.3, 0.6, 1.0],
+                      )
+                    : LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          const Color(0x20000000),
+                          const Color(0x10000000),
+                          cs.primary.withValues(alpha: 0.85),
+                        ],
+                        stops: const [0.0, 0.4, 1.0],
+                      ),
               ),
             ),
           ],

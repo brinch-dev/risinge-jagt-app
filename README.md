@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.5.5
+# Risinge Jagtvæsen v2.5.6
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -112,6 +112,10 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.5.6 (2026-05-24)
+- Lysere hero-billede i light mode med blødere gradient (billedet lyser mere igennem)
+- Dark mode beholder den mørke gradient uændret
 
 ### v2.5.5 (2026-05-23)
 - Forbedret dark mode: bedre kontrast, lysere tekst, skarpere card-borders

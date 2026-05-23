@@ -243,6 +243,19 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
+## Session 12: 2026-05-24 — v2.5.6
+
+### Hvad blev lavet
+- Lysere hero-billede i light mode: gradient ændret fra mørk overlay til let skygge
+- Light mode gradient: top `0x20000000` → `0x10000000` → `primary 85%` (billedet lyser igennem)
+- Dark mode gradient beholdt uændret (mørk overlay for kontrast)
+- Brightness-betinget gradient via `Theme.of(context).brightness`
+
+### Filer ændret
+- `lib/features/home/home_page.dart` — hero gradient opdelt i light/dark variant
+
+---
+
 ## Kendte begrænsninger og fremtidige opgaver
 
 ### Begrænsninger
