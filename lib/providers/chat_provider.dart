@@ -117,30 +117,21 @@ class ChatChannelsNotifier extends AsyncNotifier<List<ChatChannel>> {
   Future<ChatChannel> createChannel(
       String name, ChannelType type, List<String> memberIds) async {
     final client = ref.read(supabaseProvider);
-    final userId = client.auth.currentUser!.id;
+
+    final channelId = await client.rpc('create_channel_with_members', params: {
+      'p_name': name,
+      'p_type': type.name,
+      'p_member_ids': memberIds,
+    });
 
     final data = await client
         .from('chat_channels')
-        .insert({
-          'name': name,
-          'type': type.name,
-          'created_by': userId,
-        })
         .select()
+        .eq('id', channelId as String)
         .single();
 
-    final channel = ChatChannel.fromJson(data);
-
-    final allMembers = {...memberIds, userId};
-    for (final memberId in allMembers) {
-      await client.from('channel_members').insert({
-        'channel_id': channel.id,
-        'user_id': memberId,
-      });
-    }
-
     state = AsyncData(await _fetch());
-    return channel;
+    return ChatChannel.fromJson(data);
   }
 
   Future<void> deleteChannel(String channelId) async {
