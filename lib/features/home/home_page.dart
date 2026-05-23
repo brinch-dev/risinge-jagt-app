@@ -111,12 +111,13 @@ class HomePage extends ConsumerWidget {
 
   Widget _buildHero(
       HomeBlock? hero, bool isAdmin, BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     return SliverAppBar(
       expandedHeight: 280,
       pinned: true,
-      backgroundColor: const Color(0xFF1B3A1B),
-      iconTheme: const IconThemeData(color: Colors.white),
-      actionsIconTheme: const IconThemeData(color: Colors.white),
+      backgroundColor: cs.primary,
+      iconTheme: IconThemeData(color: cs.onPrimary),
+      actionsIconTheme: IconThemeData(color: cs.onPrimary),
       actions: [
         const NotificationBell(),
         if (isAdmin)
@@ -132,11 +133,11 @@ class HomePage extends ConsumerWidget {
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
           hero?.title ?? 'Risinge Jagtvæsen',
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: cs.onPrimary,
             fontWeight: FontWeight.bold,
             fontSize: 18,
-            shadows: [
+            shadows: const [
               Shadow(blurRadius: 12, color: Colors.black),
               Shadow(blurRadius: 24, color: Colors.black87),
             ],
@@ -149,17 +150,17 @@ class HomePage extends ConsumerWidget {
               'assets/images/risinge_hero.jpg',
               fit: BoxFit.cover,
             ),
-            const DecoratedBox(
+            DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x60000000),
-                    Color(0x80000000),
-                    Color(0xEE1B3A1B),
+                    const Color(0x60000000),
+                    const Color(0x80000000),
+                    cs.primary.withValues(alpha: 0.93),
                   ],
-                  stops: [0.3, 0.6, 1.0],
+                  stops: const [0.3, 0.6, 1.0],
                 ),
               ),
             ),
@@ -222,6 +223,7 @@ class _WelcomeBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Column(
@@ -230,29 +232,29 @@ class _WelcomeBlock extends StatelessWidget {
           if (userName.isNotEmpty) ...[
             Text(
               'Hej, $userName',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: cs.onSurface,
               ),
             ),
             const SizedBox(height: 4),
           ],
           Text(
             block.title ?? 'Velkommen',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF333333),
+              color: cs.onSurfaceVariant,
             ),
           ),
           if (block.content != null && block.content!.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
               block.content!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF555555),
+                color: cs.outline,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -271,6 +273,7 @@ class _NextEventBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final upcoming = ref.watch(upcomingEventsProvider);
     final event = upcoming.isNotEmpty ? upcoming.first : null;
 
@@ -286,7 +289,6 @@ class _NextEventBlock extends StatelessWidget {
                 )
             : null,
         child: Card(
-        color: const Color(0xFF1A1A1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -295,11 +297,11 @@ class _NextEventBlock extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
+                  color: cs.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.calendar_month,
-                    color: Colors.white, size: 28),
+                child: Icon(Icons.calendar_month,
+                    color: cs.primary, size: 28),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -307,29 +309,29 @@ class _NextEventBlock extends StatelessWidget {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('NÆSTE EVENT',
+                          Text('NÆSTE EVENT',
                               style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF999999),
+                                  color: cs.outline,
                                   letterSpacing: 1.2)),
                           const SizedBox(height: 4),
                           Text(event.title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white)),
+                                  color: cs.onSurface)),
                           const SizedBox(height: 2),
                           Text(
                             '${DateFormat('EEEE d. MMM', 'da').format(event.date)}'
                             '${event.startTime != null ? ' kl. ${event.startTime}' : ''}',
-                            style: const TextStyle(
-                                fontSize: 13, color: Color(0xFFBBBBBB)),
+                            style: TextStyle(
+                                fontSize: 13, color: cs.onSurfaceVariant),
                           ),
                         ],
                       )
-                    : const Text('Ingen kommende events',
-                        style: TextStyle(fontSize: 15, color: Color(0xFF888888))),
+                    : Text('Ingen kommende events',
+                        style: TextStyle(fontSize: 15, color: cs.outline)),
               ),
             ],
           ),
@@ -348,12 +350,12 @@ class _EventStatsBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final upcoming = ref.watch(upcomingEventsProvider);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
-        color: const Color(0xFF1A1A1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -362,27 +364,27 @@ class _EventStatsBlock extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
+                  color: cs.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.event_note, color: Colors.white, size: 24),
+                child: Icon(Icons.event_note, color: cs.primary, size: 24),
               ),
               const SizedBox(width: 14),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('EVENTS',
+                  Text('EVENTS',
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF999999),
+                          color: cs.outline,
                           letterSpacing: 1.2)),
                   const SizedBox(height: 4),
                   Text('${upcoming.length} kommende',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white)),
+                          color: cs.onSurface)),
                 ],
               ),
             ],
@@ -449,6 +451,7 @@ class _WeatherBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final weatherAsync = ref.watch(_weatherProvider);
 
     return weatherAsync.when(
@@ -480,8 +483,7 @@ class _WeatherBlock extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Card(
-            color: const Color(0xFF1A1A1A),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -489,21 +491,21 @@ class _WeatherBlock extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(icon, size: 36, color: Colors.white),
+                      Icon(icon, size: 36, color: cs.secondary),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text('$temp°C — $label',
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white)),
+                                    color: cs.onSurface)),
                             const SizedBox(height: 2),
-                            const Text('Risinge Herregaard',
+                            Text('Risinge Herregaard',
                                 style: TextStyle(
-                                    fontSize: 12, color: Color(0xFF999999))),
+                                    fontSize: 12, color: cs.outline)),
                           ],
                         ),
                       ),
@@ -548,14 +550,15 @@ class _WeatherDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF999999)),
+        Icon(icon, size: 18, color: cs.outline),
         const SizedBox(height: 4),
         Text(value,
-            style: const TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
-        Text(label, style: const TextStyle(fontSize: 10, color: Color(0xFF888888))),
+            style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface)),
+        Text(label, style: TextStyle(fontSize: 10, color: cs.outline)),
       ],
     );
   }
@@ -569,6 +572,7 @@ class _MyReservationsBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final reservationsAsync = ref.watch(_myReservationsProvider);
 
     return reservationsAsync.when(
@@ -579,16 +583,15 @@ class _MyReservationsBlock extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Card(
-              color: const Color(0xFF1A1A1A),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              child: const Padding(
-                padding: EdgeInsets.all(16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    Icon(Icons.location_on_outlined, color: Color(0xFF666666)),
-                    SizedBox(width: 12),
+                    Icon(Icons.location_on_outlined, color: cs.outline),
+                    const SizedBox(width: 12),
                     Text('Ingen kommende reservationer',
-                        style: TextStyle(color: Color(0xFF888888))),
+                        style: TextStyle(color: cs.outline)),
                   ],
                 ),
               ),
@@ -599,22 +602,21 @@ class _MyReservationsBlock extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Card(
-            color: const Color(0xFF1A1A1A),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.location_on, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
+                      Icon(Icons.location_on, color: cs.primary, size: 20),
+                      const SizedBox(width: 8),
                       Text('DINE RESERVATIONER',
                           style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF999999),
+                              color: cs.outline,
                               letterSpacing: 1.2)),
                     ],
                   ),
@@ -641,14 +643,14 @@ class _MyReservationsBlock extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 6),
                         child: Row(
                           children: [
-                            const Icon(Icons.chevron_right,
-                                size: 16, color: Color(0xFF888888)),
+                            Icon(Icons.chevron_right,
+                                size: 16, color: cs.outline),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 '${tower?['name'] ?? '?'} — ${eventData?['title'] ?? '?'}',
-                                style: const TextStyle(
-                                    fontSize: 14, color: Colors.white),
+                                style: TextStyle(
+                                    fontSize: 14, color: cs.onSurface),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -657,8 +659,8 @@ class _MyReservationsBlock extends StatelessWidget {
                               Text(
                                 DateFormat('d/M').format(
                                     DateTime.parse(eventData!['date'] as String)),
-                                style: const TextStyle(
-                                    fontSize: 12, color: Color(0xFFBBBBBB)),
+                                style: TextStyle(
+                                    fontSize: 12, color: cs.onSurfaceVariant),
                               ),
                           ],
                         ),
@@ -668,8 +670,8 @@ class _MyReservationsBlock extends StatelessWidget {
                   if (reservations.length > 5)
                     Text(
                       '+${reservations.length - 5} mere',
-                      style: const TextStyle(
-                          fontSize: 12, color: Color(0xFF999999)),
+                      style: TextStyle(
+                          fontSize: 12, color: cs.outline),
                     ),
                 ],
               ),
@@ -689,6 +691,7 @@ class _RecentChatBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final messagesAsync = ref.watch(_recentMessagesProvider);
 
     return messagesAsync.when(
@@ -700,23 +703,22 @@ class _RecentChatBlock extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Card(
-            color: const Color(0xFF1A1A1A),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
                       Icon(Icons.chat_bubble_outline,
-                          color: Colors.white, size: 20),
-                      SizedBox(width: 8),
+                          color: cs.primary, size: 20),
+                      const SizedBox(width: 8),
                       Text('SENESTE BESKEDER',
                           style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF999999),
+                              color: cs.outline,
                               letterSpacing: 1.2)),
                     ],
                   ),
@@ -743,10 +745,10 @@ class _RecentChatBlock extends StatelessWidget {
                         children: [
                           CircleAvatar(
                             radius: 14,
-                            backgroundColor: const Color(0xFF333333),
+                            backgroundColor: cs.primaryContainer,
                             child: Text(name[0].toUpperCase(),
-                                style: const TextStyle(
-                                    fontSize: 11, color: Colors.white)),
+                                style: TextStyle(
+                                    fontSize: 11, color: cs.onPrimaryContainer)),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -756,20 +758,20 @@ class _RecentChatBlock extends StatelessWidget {
                                 Row(
                                   children: [
                                     Text(name,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
-                                            color: Colors.white)),
+                                            color: cs.onSurface)),
                                     if (channelName.isNotEmpty) ...[
-                                      const Text(' i ',
+                                      Text(' i ',
                                           style: TextStyle(
                                               fontSize: 11,
-                                              color: Color(0xFF888888))),
+                                              color: cs.outline)),
                                       Flexible(
                                         child: Text(channelName,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                                 fontSize: 11,
-                                                color: Color(0xFFBBBBBB)),
+                                                color: cs.onSurfaceVariant),
                                             overflow: TextOverflow.ellipsis),
                                       ),
                                     ],
@@ -777,9 +779,9 @@ class _RecentChatBlock extends StatelessWidget {
                                 ),
                                 Text(
                                   content,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontSize: 13,
-                                      color: Color(0xFFAAAAAA)),
+                                      color: cs.onSurfaceVariant),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -789,8 +791,8 @@ class _RecentChatBlock extends StatelessWidget {
                           if (time != null)
                             Text(
                               DateFormat('HH:mm').format(time.toLocal()),
-                              style: const TextStyle(
-                                  fontSize: 10, color: Color(0xFF888888)),
+                              style: TextStyle(
+                                  fontSize: 10, color: cs.outline),
                             ),
                         ],
                       ),
@@ -814,6 +816,7 @@ class _CountdownBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final upcoming = ref.watch(upcomingEventsProvider);
     if (upcoming.isEmpty) return const SizedBox.shrink();
 
@@ -834,10 +837,10 @@ class _CountdownBlock extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Card(
-        color: Colors.white,
+        color: cs.surfaceContainerLowest,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: Colors.black, width: 2),
+          side: BorderSide(color: cs.primary, width: 2),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -847,13 +850,13 @@ class _CountdownBlock extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: Colors.black,
+                  color: cs.primary,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   countdownText,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: cs.onPrimary,
                     fontWeight: FontWeight.w900,
                     fontSize: 18,
                   ),
@@ -865,14 +868,14 @@ class _CountdownBlock extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(event.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black)),
+                            color: cs.onSurface)),
                     Text(
                       DateFormat('EEEE d. MMMM', 'da').format(event.date),
                       style:
-                          const TextStyle(fontSize: 13, color: Color(0xFF444444)),
+                          TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -893,17 +896,13 @@ class _TextBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     if (block.content == null || block.content!.isEmpty) {
       return const SizedBox.shrink();
     }
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Card(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: Colors.grey.shade300),
-        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -914,17 +913,17 @@ class _TextBlock extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
                     block.title!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: cs.onSurface,
                       fontSize: 16,
                     ),
                   ),
                 ),
               Text(
                 block.content!,
-                style: const TextStyle(
-                  color: Color(0xFF333333),
+                style: TextStyle(
+                  color: cs.onSurfaceVariant,
                   fontSize: 14,
                   height: 1.5,
                 ),
@@ -945,17 +944,18 @@ class _AnnouncementBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Card(
-        color: const Color(0xFF1A1A1A),
+        color: cs.primaryContainer,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.campaign, color: Colors.white, size: 24),
+              Icon(Icons.campaign, color: cs.onPrimaryContainer, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -964,9 +964,9 @@ class _AnnouncementBlock extends StatelessWidget {
                     if (block.title != null && block.title!.isNotEmpty)
                       Text(
                         block.title!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: cs.onPrimaryContainer,
                           fontSize: 15,
                         ),
                       ),
@@ -975,8 +975,8 @@ class _AnnouncementBlock extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         block.content!,
-                        style: const TextStyle(
-                          color: Color(0xFFCCCCCC),
+                        style: TextStyle(
+                          color: cs.onPrimaryContainer.withValues(alpha: 0.8),
                           fontSize: 14,
                           height: 1.4,
                         ),
@@ -1001,6 +1001,7 @@ class _ImageBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     if (block.imageUrl == null || block.imageUrl!.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1018,9 +1019,9 @@ class _ImageBlock extends StatelessWidget {
               height: 200,
               errorBuilder: (_, __, ___) => Container(
                 height: 200,
-                color: Colors.grey.shade200,
+                color: cs.surfaceContainerHighest,
                 child:
-                    const Center(child: Icon(Icons.broken_image, size: 48)),
+                    Center(child: Icon(Icons.broken_image, size: 48, color: cs.outline)),
               ),
             ),
             if (block.title != null && block.title!.isNotEmpty)
@@ -1030,7 +1031,7 @@ class _ImageBlock extends StatelessWidget {
                   block.title!,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.grey.shade600,
+                    color: cs.outline,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -1041,4 +1042,3 @@ class _ImageBlock extends StatelessWidget {
     );
   }
 }
-

@@ -286,7 +286,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                   IconButton(
                     icon: const Icon(Icons.attach_file),
                     onPressed: _isUploading ? null : _showAttachMenu,
-                    color: Colors.grey.shade600,
+                    color: Theme.of(context).colorScheme.outline,
                   ),
                   Expanded(
                     child: TextField(
@@ -334,10 +334,10 @@ class _MessageBubble extends StatelessWidget {
           if (!isMe) ...[
             CircleAvatar(
               radius: 16,
-              backgroundColor: Colors.green.shade100,
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               child: Text(
                 (message.senderName ?? '?')[0].toUpperCase(),
-                style: const TextStyle(fontSize: 12),
+                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onPrimaryContainer),
               ),
             ),
             const SizedBox(width: 8),
@@ -350,7 +350,7 @@ class _MessageBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isMe
                     ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.shade200,
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
@@ -372,8 +372,8 @@ class _MessageBubble extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                           color: isMe
-                              ? Colors.white.withValues(alpha: 0.8)
-                              : Colors.green.shade700,
+                              ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8)
+                              : Theme.of(context).colorScheme.primary,
                         ),
                       ),
                     ),
@@ -390,7 +390,7 @@ class _MessageBubble extends StatelessWidget {
                           errorBuilder: (_, __, ___) => Container(
                             width: 240,
                             height: 160,
-                            color: Colors.grey.shade300,
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
                             child:
                                 const Icon(Icons.broken_image, size: 48),
                           ),
@@ -414,7 +414,7 @@ class _MessageBubble extends StatelessWidget {
                               message.content,
                               style: TextStyle(
                                 color:
-                                    isMe ? Colors.white : Colors.black87,
+                                    isMe ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface,
                               ),
                             )
                           : message.content.isNotEmpty
@@ -422,8 +422,8 @@ class _MessageBubble extends StatelessWidget {
                                   message.content,
                                   style: TextStyle(
                                     color: isMe
-                                        ? Colors.white
-                                        : Colors.black87,
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSurface,
                                   ),
                                 )
                               : const SizedBox.shrink(),
@@ -438,8 +438,8 @@ class _MessageBubble extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10,
                         color: isMe
-                            ? Colors.white.withValues(alpha: 0.7)
-                            : Colors.grey,
+                            ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)
+                            : Theme.of(context).colorScheme.outline,
                       ),
                     ),
                   ),

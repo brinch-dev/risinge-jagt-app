@@ -110,7 +110,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                      Icon(Icons.calendar_today, size: 16, color: Theme.of(context).colorScheme.outline),
                       const SizedBox(width: 6),
                       Text(DateFormat('EEEE d. MMMM yyyy', 'da').format(event.date)),
                     ],
@@ -119,7 +119,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                        Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.outline),
                         const SizedBox(width: 6),
                         Text('${event.startTime}${event.endTime != null ? ' - ${event.endTime}' : ''}'),
                       ],
@@ -133,10 +133,10 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.map, size: 16, color: Colors.green.shade700),
+                        Icon(Icons.map, size: 16, color: Theme.of(context).colorScheme.primary),
                         const SizedBox(width: 6),
                         Text('Område: ${event.areaName}',
-                            style: TextStyle(color: Colors.green.shade700)),
+                            style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                       ],
                     ),
                   ],
@@ -161,8 +161,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     label: const Text('Tilmeldt'),
                     style: FilledButton.styleFrom(
                       backgroundColor: myStatus == SignupStatus.attending
-                          ? Colors.green
-                          : Colors.green.shade200,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -176,8 +176,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     label: const Text('Kommer ikke'),
                     style: FilledButton.styleFrom(
                       backgroundColor: myStatus == SignupStatus.notAttending
-                          ? Colors.red
-                          : Colors.red.shade200,
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -203,14 +203,14 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
           const SizedBox(height: 8),
 
           if (attending.isNotEmpty) ...[
-            _sectionHeader(Icons.check_circle, 'Tilmeldt (${attending.length})', Colors.green),
-            ...attending.map((s) => _memberTile(s.userName ?? 'Ukendt', Colors.green, Icons.check_circle)),
+            _sectionHeader(Icons.check_circle, 'Tilmeldt (${attending.length})', Theme.of(context).colorScheme.primary),
+            ...attending.map((s) => _memberTile(s.userName ?? 'Ukendt', Theme.of(context).colorScheme.primary, Icons.check_circle)),
           ],
 
           if (declined.isNotEmpty) ...[
             const SizedBox(height: 8),
-            _sectionHeader(Icons.cancel, 'Kommer ikke (${declined.length})', Colors.red),
-            ...declined.map((s) => _memberTile(s.userName ?? 'Ukendt', Colors.red, Icons.cancel)),
+            _sectionHeader(Icons.cancel, 'Kommer ikke (${declined.length})', Theme.of(context).colorScheme.error),
+            ...declined.map((s) => _memberTile(s.userName ?? 'Ukendt', Theme.of(context).colorScheme.error, Icons.cancel)),
           ],
 
           allMembers.when(
@@ -225,10 +225,10 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 8),
-                  _sectionHeader(Icons.help_outline, 'Ikke reageret (${notResponded.length})', Colors.grey),
+                  _sectionHeader(Icons.help_outline, 'Ikke reageret (${notResponded.length})', Theme.of(context).colorScheme.outline),
                   ...notResponded.map((m) => _memberTile(
                       m['display_name'] as String? ?? m['email'] as String,
-                      Colors.grey,
+                      Theme.of(context).colorScheme.outline,
                       Icons.help_outline)),
                 ],
               );
@@ -256,11 +256,11 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                     margin: const EdgeInsets.only(bottom: 8),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: Colors.green.shade100,
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                         radius: 16,
                         child: Text(
                           (c.userName ?? '?')[0].toUpperCase(),
-                          style: TextStyle(color: Colors.green.shade700, fontSize: 14),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer, fontSize: 14),
                         ),
                       ),
                       title: Text(c.body),
@@ -337,10 +337,10 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
         final tempMin =
             ((daily['temperature_2m_min'] as List).first as num).round();
 
+        final cs = Theme.of(context).colorScheme;
         return Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Card(
-            color: const Color(0xFF1A1A1A),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
@@ -348,9 +348,9 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _weatherCol(Icons.thermostat, '$tempMin° / $tempMax°', 'Temp'),
-                  _weatherCol(Icons.wb_twilight, sunrise, 'Sol op'),
-                  _weatherCol(
+                  _weatherCol(context, Icons.thermostat, '$tempMin° / $tempMax°', 'Temp'),
+                  _weatherCol(context, Icons.wb_twilight, sunrise, 'Sol op'),
+                  _weatherCol(context,
                       Icons.nightlight_round, sunset, 'Sol ned'),
                 ],
               ),
@@ -361,16 +361,17 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
     );
   }
 
-  Widget _weatherCol(IconData icon, String value, String label) {
+  Widget _weatherCol(BuildContext context, IconData icon, String value, String label) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF999999)),
+        Icon(icon, size: 18, color: cs.outline),
         const SizedBox(height: 4),
         Text(value,
-            style: const TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+            style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface)),
         Text(label,
-            style: const TextStyle(fontSize: 10, color: Color(0xFF888888))),
+            style: TextStyle(fontSize: 10, color: cs.outline)),
       ],
     );
   }

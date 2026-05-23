@@ -22,6 +22,7 @@ class AreaDetailSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
     final isMemberOrAdmin = profile != null && !profile!.isGuest;
     final towers =
         (ref.watch(towersProvider).value ?? []).where((t) => t.areaId == area.id).toList();
@@ -52,14 +53,14 @@ class AreaDetailSheet extends ConsumerWidget {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade400,
+                  color: cs.outline,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
             Row(
               children: [
-                const Icon(Icons.map, color: Colors.green, size: 28),
+                Icon(Icons.map, color: cs.primary, size: 28),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -76,13 +77,13 @@ class AreaDetailSheet extends ConsumerWidget {
               Text(area.description!, style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 8),
             ],
-            _infoRow(Icons.pentagon, 'Polygon',
+            _infoRow(context, Icons.pentagon, 'Polygon',
                 '${(ref.watch(areaBoundariesProvider).value ?? {})[area.id]?.length ?? 0} punkter'),
-            _infoRow(Icons.warning_amber, 'Alarm margin',
+            _infoRow(context, Icons.warning_amber, 'Alarm margin',
                 '${area.alarmMarginMeters.round()} meter'),
 
             const SizedBox(height: 8),
-            _infoRow(Icons.visibility, 'Poster', '${towers.length} poster i området'),
+            _infoRow(context, Icons.visibility, 'Poster', '${towers.length} poster i området'),
 
             if (isMemberOrAdmin) ...[
               const Divider(height: 24),
@@ -90,8 +91,8 @@ class AreaDetailSheet extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               if (towers.isEmpty)
-                const Text('Ingen poster oprettet i dette område',
-                    style: TextStyle(color: Colors.grey))
+                Text('Ingen poster oprettet i dette område',
+                    style: TextStyle(color: cs.outline))
               else
                 ...towers.map((tower) => _buildTowerTile(
                     context, tower, reservations, upcomingEvents, profile!)),
@@ -101,8 +102,8 @@ class AreaDetailSheet extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               if (upcomingEvents.isEmpty)
-                const Text('Ingen kommende events',
-                    style: TextStyle(color: Colors.grey))
+                Text('Ingen kommende events',
+                    style: TextStyle(color: cs.outline))
               else
                 ...upcomingEvents
                     .map((event) => _buildEventTile(context, event)),
@@ -111,17 +112,17 @@ class AreaDetailSheet extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: cs.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.lock, color: Colors.grey),
-                    SizedBox(width: 8),
+                    Icon(Icons.lock, color: cs.outline),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Log ind som medlem for at se events, poster og reservationer',
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: cs.outline),
                       ),
                     ),
                   ],
@@ -135,12 +136,13 @@ class AreaDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _infoRow(IconData icon, String label, String value) {
+  Widget _infoRow(BuildContext context, IconData icon, String label, String value) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Colors.grey),
+          Icon(icon, size: 18, color: cs.outline),
           const SizedBox(width: 8),
           Text('$label: ', style: const TextStyle(fontWeight: FontWeight.w500)),
           Expanded(child: Text(value)),
@@ -152,6 +154,7 @@ class AreaDetailSheet extends ConsumerWidget {
   Widget _buildTowerTile(BuildContext context, Tower tower,
       List<TowerReservation> reservations, List<HuntEvent> events,
       UserProfile profile) {
+    final cs = Theme.of(context).colorScheme;
     final nextEvent = events.isNotEmpty ? events.first : null;
     TowerReservation? reservation;
     if (nextEvent != null) {
@@ -162,7 +165,7 @@ class AreaDetailSheet extends ConsumerWidget {
     }
 
     final isReserved = reservation != null;
-    final color = isReserved ? Colors.red : Colors.green;
+    final color = isReserved ? cs.error : cs.primary;
 
     return Card(
       child: ListTile(
@@ -174,20 +177,19 @@ class AreaDetailSheet extends ConsumerWidget {
                 ? 'Optaget af ${reservation.userName ?? 'ukendt'}'
                 : 'Optaget')
             : 'Ledig'),
-        trailing: isReserved
-            ? Icon(Icons.circle, color: color, size: 12)
-            : Icon(Icons.circle, color: color, size: 12),
+        trailing: Icon(Icons.circle, color: color, size: 12),
       ),
     );
   }
 
   Widget _buildEventTile(BuildContext context, HuntEvent event) {
+    final cs = Theme.of(context).colorScheme;
     final dateStr =
         '${event.date.day}/${event.date.month}/${event.date.year}';
     return Card(
       child: ListTile(
         dense: true,
-        leading: const Icon(Icons.event, color: Colors.green),
+        leading: Icon(Icons.event, color: cs.primary),
         title: Text(event.title),
         subtitle: Text(
             '$dateStr${event.startTime != null ? ' kl. ${event.startTime}' : ''}'

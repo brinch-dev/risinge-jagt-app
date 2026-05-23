@@ -65,13 +65,13 @@ class ChatListPage extends ConsumerWidget {
           return ListView(
             children: [
               if (general.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: Text(
                     'GENEREL',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                      color: Theme.of(context).colorScheme.outline,
                       fontSize: 12,
                     ),
                   ),
@@ -79,13 +79,13 @@ class ChatListPage extends ConsumerWidget {
                 ...general.map((c) => _ChannelTile(channel: c)),
               ],
               if (others.isNotEmpty) ...[
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                   child: Text(
                     'PRIVATE & GRUPPE',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                      color: Theme.of(context).colorScheme.outline,
                       fontSize: 12,
                     ),
                   ),
@@ -142,18 +142,19 @@ class _ChannelTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: channel.isGeneral
-            ? Colors.green.shade100
-            : Colors.blue.shade100,
+            ? cs.primaryContainer
+            : cs.secondaryContainer,
         child: Icon(
           channel.isGeneral
               ? Icons.public
               : channel.type == ChannelType.group
                   ? Icons.group
                   : Icons.person,
-          color: channel.isGeneral ? Colors.green : Colors.blue,
+          color: channel.isGeneral ? cs.primary : cs.secondary,
         ),
       ),
       title: Text(channel.name),
@@ -161,7 +162,7 @@ class _ChannelTile extends StatelessWidget {
           ? (channel.description != null && channel.description!.isNotEmpty
               ? Text(
                   channel.description!,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
+                  style: TextStyle(fontSize: 12, color: cs.outline, fontStyle: FontStyle.italic),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 )
@@ -174,7 +175,7 @@ class _ChannelTile extends StatelessWidget {
       trailing: channel.lastMessageAt != null
           ? Text(
               timeago.format(channel.lastMessageAt!, locale: 'da'),
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: TextStyle(fontSize: 12, color: cs.outline),
             )
           : null,
       onTap: () {

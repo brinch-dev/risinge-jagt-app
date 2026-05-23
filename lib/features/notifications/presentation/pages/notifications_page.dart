@@ -32,13 +32,13 @@ class NotificationsPage extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Fejl: $e')),
         data: (notifications) {
           if (notifications.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.notifications_none, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('Ingen notifikationer'),
+                  Icon(Icons.notifications_none, size: 64, color: Theme.of(context).colorScheme.outline),
+                  const SizedBox(height: 16),
+                  const Text('Ingen notifikationer'),
                 ],
               ),
             );
@@ -177,7 +177,7 @@ class _NotificationTile extends StatelessWidget {
                 const Spacer(),
                 Text(
                   timeago.format(notification.createdAt, locale: 'da'),
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.outline),
                 ),
               ],
             ),
@@ -214,13 +214,13 @@ class _NotificationTile extends StatelessWidget {
   Color _getColor() {
     switch (notification.type) {
       case NotificationType.broadcast:
-        return Colors.orange;
+        return const Color(0xFFD4A843);
       case NotificationType.newEvent:
-        return Colors.green;
+        return const Color(0xFF2E5A2E);
       case NotificationType.chatMessage:
-        return Colors.blue;
+        return const Color(0xFF4A7A8A);
       case NotificationType.chatGeneral:
-        return Colors.purple;
+        return const Color(0xFF7A5A8A);
     }
   }
 }

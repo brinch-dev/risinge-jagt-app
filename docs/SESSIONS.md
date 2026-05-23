@@ -203,6 +203,39 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
+## Session 11: 2026-05-23 — v2.5.3 → v2.5.4
+
+### v2.5.3: Tilmeld event fra postsiden
+- "Tilmeld event først"-knap tilmelder bruger direkte og skifter til "Reserver"
+- Vejrdata (sol op/ned, temperatur) vises på event detaljesiden
+
+### v2.5.4: Komplet farvetema redesign
+- Nyt jagt-inspireret farveskema med forest green, sand/cream og guld accenter
+- `theme.dart` omskrevet med komplette light og dark temaer
+- Tilføjet Material 3 `surfaceContainer` varianter til begge temaer
+- Alle 11 widget-filer opdateret til at bruge `Theme.of(context).colorScheme` i stedet for hardcoded farver
+- Dashboard widgets: fjernet hardcoded `#1A1A1A` baggrund → bruger tema card-farve
+- Chat: bobler, avatarer og tidsstempler bruger tema-farver
+- Kalender: status-farver og event-kort tilpasset
+- Admin panel: alle ikoner ensrettet med primary-farve
+- Notifications, profil, kort detaljer: alle theme-aware
+- Fuld kompatibilitet med både light og dark mode
+
+### Filer ændret
+- `lib/app/theme.dart` — komplet omskrivning med jagt-farvepalet
+- `lib/features/home/home_page.dart` — alle widgets theme-aware
+- `lib/features/calendar/presentation/pages/event_detail_page.dart`
+- `lib/features/calendar/presentation/pages/calendar_page.dart`
+- `lib/features/chat/presentation/pages/chat_page.dart`
+- `lib/features/chat/presentation/pages/chat_list_page.dart`
+- `lib/features/profile/presentation/pages/profile_page.dart`
+- `lib/features/admin/presentation/pages/admin_panel_page.dart`
+- `lib/features/admin/presentation/pages/create_event_page.dart`
+- `lib/features/notifications/presentation/pages/notifications_page.dart`
+- `lib/features/map/presentation/widgets/area_detail_sheet.dart`
+
+---
+
 ## Kendte begrænsninger og fremtidige opgaver
 
 ### Begrænsninger

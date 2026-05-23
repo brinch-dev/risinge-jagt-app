@@ -24,6 +24,8 @@ class AdminPanelPage extends ConsumerWidget {
       );
     }
 
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin'),
@@ -31,97 +33,43 @@ class AdminPanelPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.map, color: Colors.green),
-              title: const Text('Jagtområder'),
-              subtitle: const Text('Opret og administrer jagtområder'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ManageAreasPage()),
-              ),
-            ),
-          ),
+          _adminTile(context, Icons.map, cs.primary, 'Jagtområder',
+              'Opret og administrer jagtområder', const ManageAreasPage()),
           const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.people, color: Colors.blue),
-              title: const Text('Brugere'),
-              subtitle: const Text('Administrer brugerroller'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ManageUsersPage()),
-              ),
-            ),
-          ),
+          _adminTile(context, Icons.people, cs.primary, 'Brugere',
+              'Administrer brugerroller', const ManageUsersPage()),
           const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.dashboard_customize, color: Colors.indigo),
-              title: const Text('Forside'),
-              subtitle: const Text('Rediger forsideblokke og synlighed'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ManageHomepagePage()),
-              ),
-            ),
-          ),
+          _adminTile(context, Icons.dashboard_customize, cs.primary, 'Forside',
+              'Rediger forsideblokke og synlighed', const ManageHomepagePage()),
           const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.shield, color: Colors.purple),
-              title: const Text('Roller'),
-              subtitle: const Text('Opret, rediger og slet roller + chat adgang'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ManageRolesPage()),
-              ),
-            ),
-          ),
+          _adminTile(context, Icons.shield, cs.primary, 'Roller',
+              'Opret, rediger og slet roller + chat adgang', const ManageRolesPage()),
           const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.chat, color: Colors.teal),
-              title: const Text('Chat-kanaler'),
-              subtitle: const Text('Opret, rediger og slet kanaler + rolle-adgang'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ManageChannelsPage()),
-              ),
-            ),
-          ),
+          _adminTile(context, Icons.chat, cs.primary, 'Chat-kanaler',
+              'Opret, rediger og slet kanaler + rolle-adgang', const ManageChannelsPage()),
           const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.campaign, color: Colors.orange),
-              title: const Text('Broadcast'),
-              subtitle: const Text('Send besked til alle medlemmer'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BroadcastPage()),
-              ),
-            ),
-          ),
+          _adminTile(context, Icons.campaign, cs.primary, 'Broadcast',
+              'Send besked til alle medlemmer', const BroadcastPage()),
           const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.list_alt, color: Colors.deepOrange),
-              title: const Text('Admin Log'),
-              subtitle: const Text('Se al aktivitet i appen'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const AdminLogPage()),
-              ),
-            ),
-          ),
+          _adminTile(context, Icons.list_alt, cs.primary, 'Admin Log',
+              'Se al aktivitet i appen', const AdminLogPage()),
         ],
+      ),
+    );
+  }
+
+  Widget _adminTile(BuildContext context, IconData icon, Color color,
+      String title, String subtitle, Widget page) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon, color: color),
+        title: Text(title),
+        subtitle: Text(subtitle),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => page),
+        ),
       ),
     );
   }

@@ -211,15 +211,16 @@ class _EventCard extends ConsumerWidget {
         ? ref.read(eventSignupsProvider.notifier).getStatus(event.id, currentUserId)
         : null;
 
-    Color statusColor = Colors.grey;
+    final cs = Theme.of(context).colorScheme;
+    Color statusColor = cs.outline;
     String statusText = 'Ikke reageret';
     IconData statusIcon = Icons.help_outline;
     if (myStatus == SignupStatus.attending) {
-      statusColor = Colors.green;
+      statusColor = cs.primary;
       statusText = 'Tilmeldt';
       statusIcon = Icons.check_circle;
     } else if (myStatus == SignupStatus.notAttending) {
-      statusColor = Colors.red;
+      statusColor = cs.error;
       statusText = 'Kommer ikke';
       statusIcon = Icons.cancel;
     }
@@ -244,7 +245,7 @@ class _EventCard extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.event, color: Colors.green),
+                  Icon(Icons.event, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(event.title,
@@ -267,7 +268,7 @@ class _EventCard extends ConsumerWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${event.startTime}${event.endTime != null ? ' - ${event.endTime}' : ''}',
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(color: cs.outline),
                 ),
               ],
               const SizedBox(height: 8),
@@ -280,13 +281,13 @@ class _EventCard extends ConsumerWidget {
                   const Spacer(),
                   Text(
                     '${attending.length} tilmeldt',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12, color: cs.outline),
                   ),
                   if (declined.isNotEmpty) ...[
                     const SizedBox(width: 8),
                     Text(
                       '${declined.length} afbud',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: TextStyle(fontSize: 12, color: cs.outline),
                     ),
                   ],
                 ],
@@ -294,7 +295,7 @@ class _EventCard extends ConsumerWidget {
               const SizedBox(height: 4),
               Text(
                 'Tryk for detaljer, tilmelding og noter',
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                style: TextStyle(fontSize: 11, color: cs.outline),
               ),
             ],
           ),

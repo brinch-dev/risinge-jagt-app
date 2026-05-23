@@ -139,8 +139,8 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
     final tempMax = ((daily['temperature_2m_max'] as List).first as num).round();
     final tempMin = ((daily['temperature_2m_min'] as List).first as num).round();
 
+    final cs = Theme.of(context).colorScheme;
     return Card(
-      color: const Color(0xFF1A1A1A),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -149,14 +149,14 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.wb_sunny, color: Colors.amber, size: 20),
+                Icon(Icons.wb_sunny, color: cs.secondary, size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'Vejr d. ${DateFormat('d. MMM', 'da').format(_date)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF999999),
+                    color: cs.outline,
                   ),
                 ),
               ],
@@ -177,15 +177,16 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   }
 
   Widget _weatherInfo(IconData icon, String value, String label) {
+    final cs = Theme.of(context).colorScheme;
     return Column(
       children: [
-        Icon(icon, size: 18, color: const Color(0xFF999999)),
+        Icon(icon, size: 18, color: cs.outline),
         const SizedBox(height: 4),
         Text(value,
-            style: const TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+            style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface)),
         Text(label,
-            style: const TextStyle(fontSize: 10, color: Color(0xFF888888))),
+            style: TextStyle(fontSize: 10, color: cs.outline)),
       ],
     );
   }

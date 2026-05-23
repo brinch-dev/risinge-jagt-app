@@ -83,7 +83,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           child: Text(
             profile.email,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey,
+                  color: Theme.of(context).colorScheme.outline,
                 ),
           ),
         ),
@@ -124,7 +124,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             return Center(
               child: Text(
                 'Version $version ($build)',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
               ),
             );
           },
@@ -153,21 +153,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Color _roleColor(UserRole role) {
+    final cs = Theme.of(context).colorScheme;
     switch (role) {
       case UserRole.admin:
-        return Colors.amber.shade100;
+        return cs.secondaryContainer;
       case UserRole.jaegerMedlem:
-        return Colors.green.shade100;
+        return cs.primaryContainer;
       case UserRole.ejer:
-        return Colors.purple.shade100;
+        return cs.primaryContainer;
       case UserRole.forvalter:
-        return Colors.blue.shade100;
+        return cs.primaryContainer;
       case UserRole.bbDirektoer:
-        return Colors.orange.shade100;
+        return cs.secondaryContainer;
       case UserRole.jagtGaest:
-        return Colors.teal.shade100;
+        return cs.surfaceContainerHighest;
       case UserRole.gaest:
-        return Colors.grey.shade200;
+        return cs.surfaceContainerHighest;
     }
   }
 
