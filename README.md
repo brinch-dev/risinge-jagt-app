@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.4.0
+# Risinge Jagtvæsen v2.4.6
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -112,6 +112,15 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.4.6 (2026-05-23)
+- Fix: events synlige for alle roller (RLS-policy brugte forkert rollenavn 'member' i stedet for 'jaeger_medlem')
+- Fix: chat kanal-oprettelse for ikke-admin roller (SECURITY DEFINER funktion)
+- Fix: events vises mens profil loader (default til vis-alle)
+- Kamera og medie-permissions tilføjet (CAMERA, READ_MEDIA_IMAGES, READ_MEDIA_VIDEO)
+- Klikbare dashboard widgets (navigerer til kalender, kort, chat)
+- Sort/hvid tema på alle dashboard widgets
+- Fjernet gamle info-kort (erstattet af nye widgets)
 
 ### v2.4.0 (2026-05-22)
 - Dashboard widgets: næste event, event-statistik, vejrudsigt, mine reservationer, seneste chat, nedtælling

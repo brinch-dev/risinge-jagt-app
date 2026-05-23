@@ -158,6 +158,27 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
+## Session 10: 2026-05-22/23 — v2.4.0 → v2.4.6
+
+### Dashboard redesign
+- Sort/hvid tema på alle dashboard widgets (mørke kort 0xFF1A1A1A med hvid tekst)
+- Nedtælling: hvidt kort med sort border og sort badge
+- Klikbare widgets: næste event/nedtælling/event-statistik → kalender, mine reservationer → kort, seneste chat → chat
+- Tab-navigation via Riverpod `tabIndexProvider` (NotifierProvider)
+- Fjernet gamle info-kort (info_cards bloktype)
+
+### Bugfixes
+- **Events ikke synlige for jægermedlem**: RLS policy på `hunt_events` brugte `role = 'member'` i stedet for `'jaeger_medlem'`. Droppet gammel policy og oprettet ny med `USING (true)` for alle authenticated users.
+- **Events skjult mens profil loader**: `canSeeAllEvents ?? false` skjulte events når profil var null. Ændret til `?? true`.
+- **Chat kanal-oprettelse fejlede for ikke-admin (42501)**: `channel_members` INSERT blokeret af RLS. Oprettet SECURITY DEFINER funktion `create_channel_with_members()` og opdateret `createChannel` til at bruge `client.rpc()`.
+- **Kamera/medie-upload virkede ikke**: Manglende Android permissions (CAMERA, READ_MEDIA_IMAGES, READ_MEDIA_VIDEO). Tilføjet til AndroidManifest.xml.
+
+### SQL kørt
+- `create_channel_with_members()` — SECURITY DEFINER funktion til kanal-oprettelse
+- DROP + CREATE policy på `hunt_events` — åben SELECT for alle authenticated users
+
+---
+
 ## Kendte begrænsninger og fremtidige opgaver
 
 ### Begrænsninger

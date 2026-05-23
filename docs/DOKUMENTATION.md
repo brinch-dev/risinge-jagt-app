@@ -1,7 +1,7 @@
 # Risinge Jagtvæsen — App Dokumentation
 
-**Version:** 2.4.0
-**Opdateret:** 2026-05-22
+**Version:** 2.4.6
+**Opdateret:** 2026-05-23
 **Platforme:** Android (APK) + Web (Firebase Hosting)
 **Backend:** Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)
 
@@ -85,8 +85,10 @@ Roller styres dynamisk via `roles`-tabellen. Admin kan oprette, redigere og slet
 ## Funktioner
 
 ### Forside
-- Dynamisk forside med konfigurerbare blokke (hero, velkomst, tekst, billede, meddelelse, info-kort)
+- Dynamisk forside med konfigurerbare blokke (hero, velkomst, tekst, billede, meddelelse)
 - Dashboard widgets: næste event, nedtælling, event-statistik, vejrudsigt, mine reservationer, seneste chat
+- Sort/hvid tema på alle dashboard widgets (mørke kort med hvid tekst)
+- Klikbare widgets: navigerer til kalender, kort eller chat
 - Vejrudsigt via Open-Meteo API (temperatur, vind, fugtighed, solopgang/solnedgang)
 - Admin kan tilføje/fjerne/aktivere/deaktivere alle widgets med rollebaseret synlighed
 - Hero med gradient overlay og hvid tekst
@@ -180,6 +182,8 @@ Roller styres dynamisk via `roles`-tabellen. Admin kan oprette, redigere og slet
 
 ### Vigtige RLS-funktioner
 - `can_access_channel(channel_id, user_id)` — SECURITY DEFINER funktion der tjekker kanal-adgang uden nested RLS
+- `create_channel_with_members(p_name, p_type, p_member_ids)` — SECURITY DEFINER funktion til kanal-oprettelse (bypasser channel_members RLS)
+- `hunt_events` SELECT policy: `USING (true)` for alle authenticated users (ikke rolle-begrænset)
 
 ---
 
