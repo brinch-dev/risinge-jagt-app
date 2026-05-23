@@ -150,32 +150,33 @@ class JagtTheme {
     colorScheme: ColorScheme.dark(
       primary: const Color(0xFF8ABF8A),
       onPrimary: _forest,
-      primaryContainer: _forest,
+      primaryContainer: const Color(0xFF243824),
       onPrimaryContainer: const Color(0xFFCCE5CC),
       secondary: _goldLight,
       onSecondary: _bark,
       secondaryContainer: const Color(0xFF4A3A10),
       onSecondaryContainer: _goldLight,
-      surface: const Color(0xFF1A1A16),
-      onSurface: const Color(0xFFE8E0D0),
-      onSurfaceVariant: const Color(0xFF9E9686),
-      surfaceContainerLowest: const Color(0xFF141410),
-      surfaceContainerLow: const Color(0xFF1E1E1A),
-      surfaceContainer: const Color(0xFF252520),
+      surface: const Color(0xFF141412),
+      onSurface: const Color(0xFFF0EAE0),
+      onSurfaceVariant: const Color(0xFFB0A896),
+      surfaceContainerLowest: const Color(0xFF101010),
+      surfaceContainerLow: const Color(0xFF1A1A16),
+      surfaceContainer: const Color(0xFF222220),
       surfaceContainerHigh: const Color(0xFF2E2E28),
-      surfaceContainerHighest: const Color(0xFF383830),
+      surfaceContainerHighest: const Color(0xFF3A3A32),
       error: const Color(0xFFFF8A80),
-      outline: const Color(0xFF6A6050),
+      outline: const Color(0xFF8A7E6E),
     ),
-    scaffoldBackgroundColor: const Color(0xFF1A1A16),
+    scaffoldBackgroundColor: const Color(0xFF141412),
     appBarTheme: const AppBarTheme(
       centerTitle: true,
       elevation: 0,
-      backgroundColor: Color(0xFF1A1A16),
-      foregroundColor: Color(0xFFE8E0D0),
+      backgroundColor: Color(0xFF141412),
+      foregroundColor: Color(0xFFF0EAE0),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: const Color(0xFF1A1A16),
+      surfaceTintColor: Colors.transparent,
       indicatorColor: _forest,
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -192,16 +193,25 @@ class JagtTheme {
     ),
     cardTheme: CardThemeData(
       elevation: 0,
-      color: const Color(0xFF252520),
+      color: const Color(0xFF1E1E1A),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xFF8ABF8A), width: 2),
+      ),
       filled: true,
-      fillColor: const Color(0xFF252520),
+      fillColor: const Color(0xFF1E1E1A),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -212,9 +222,38 @@ class JagtTheme {
         textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
     ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF8ABF8A),
+        side: const BorderSide(color: Color(0xFF8ABF8A)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: const Color(0xFF8ABF8A)),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: const Color(0xFF2A2A24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    ),
+    dividerTheme: DividerThemeData(color: Colors.white.withValues(alpha: 0.1)),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: _goldLight,
-      foregroundColor: Color(0xFF1A1A16),
+      foregroundColor: Color(0xFF141412),
+    ),
+    listTileTheme: const ListTileThemeData(
+      iconColor: Color(0xFF8ABF8A),
+    ),
+    dialogTheme: DialogThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: const Color(0xFF1E1E1A),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: Color(0xFF8ABF8A),
     ),
   );
 }

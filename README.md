@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.5.4
+# Risinge Jagtvæsen v2.5.5
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -113,11 +113,15 @@ firebase deploy --only hosting
 
 ## Versionshistorik
 
+### v2.5.5 (2026-05-23)
+- Forbedret dark mode: bedre kontrast, lysere tekst, skarpere card-borders
+- Komplet dark theme med alle widget-styles (buttons, chips, dialogs, dividers, inputs)
+- Fjernet hero-tekst fra forsiden — billedet taler for sig selv
+
 ### v2.5.4 (2026-05-23)
 - Nyt jagt-inspireret farvetema: forest green, sand/cream, guld accenter
 - Komplet theme-aware UI — alle elementer tilpasser sig automatisk til light/dark mode
 - Dashboard widgets, chat, kalender, profil, admin og kort bruger nu konsistent farveskema
-- Forbedret kontrast og læsbarhed i begge temaer
 
 ### v2.5.3 (2026-05-23)
 - "Tilmeld event først"-knap på postsiden tilmelder direkte og skifter til "Reserver"

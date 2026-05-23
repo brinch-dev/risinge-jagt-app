@@ -221,6 +221,13 @@ Kronologisk oversigt over alle udviklingssessioner.
 - Notifications, profil, kort detaljer: alle theme-aware
 - Fuld kompatibilitet med både light og dark mode
 
+### v2.5.5: Dark mode forbedring + hero-tekst fjernet
+- Dark theme: mørkere scaffold (`#141412`), lysere cards (`#1E1E1A`) for bedre kontrast
+- Lysere tekst (`onSurface: #F0EAE0`, `onSurfaceVariant: #B0A896`, `outline: #8A7E6E`)
+- Skarpere card-borders (12% hvid opacity i stedet for 8%)
+- Komplet dark theme: tilføjet outlinedButton, textButton, chip, divider, dialog, listTile, snackBar, progressIndicator styles
+- Fjernet hero-tekst fra FlexibleSpaceBar — billedet vises alene
+
 ### Filer ændret
 - `lib/app/theme.dart` — komplet omskrivning med jagt-farvepalet
 - `lib/features/home/home_page.dart` — alle widgets theme-aware
