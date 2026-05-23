@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.4.7
+# Risinge Jagtvæsen v2.4.8
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -113,10 +113,12 @@ firebase deploy --only hosting
 
 ## Versionshistorik
 
-### v2.4.7 (2026-05-23)
+### v2.4.8 (2026-05-23)
 - Realtime events: alle brugere ser oprettede/slettede/redigerede events live uden genstart
-- Fix: RLS policies for INSERT/UPDATE/DELETE på hunt_events (ikke-admin kunne ikke oprette events)
-- Fix: RLS policies for event_signups og event_comments (komplet oprydning)
+- Fix: komplet RLS-oprydning med SECURITY DEFINER `get_my_role()` funktion
+- Fix: INSERT/UPDATE/DELETE policies på hunt_events (ikke-admin kunne ikke oprette events)
+- Fix: RLS policies for event_signups og event_comments
+- Fix: profiles SELECT policy (brugere kunne ikke læse profiler via subqueries)
 
 ### v2.4.6 (2026-05-23)
 - Fix: events synlige for alle roller (RLS-policy brugte forkert rollenavn 'member' i stedet for 'jaeger_medlem')

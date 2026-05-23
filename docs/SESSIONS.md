@@ -158,7 +158,7 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
-## Session 10: 2026-05-22/23 — v2.4.0 → v2.4.7
+## Session 10: 2026-05-22/23 — v2.4.0 → v2.4.8
 
 ### Dashboard redesign
 - Sort/hvid tema på alle dashboard widgets (mørke kort 0xFF1A1A1A med hvid tekst)
@@ -177,16 +177,20 @@ Kronologisk oversigt over alle udviklingssessioner.
 - Events provider lytter nu på `hunt_events` via Supabase Realtime
 - Alle brugere ser oprettede/slettede/redigerede events live uden genstart
 
-### RLS-oprydning (v2.4.7)
-- Komplet sæt RLS policies for `hunt_events` (SELECT/INSERT/UPDATE/DELETE)
+### RLS-oprydning (v2.4.8)
+- `get_my_role()` SECURITY DEFINER funktion — returnerer brugerens rolle uden at ramme profiles RLS
+- Komplet sæt RLS policies for `hunt_events` (SELECT/INSERT/UPDATE/DELETE) via `get_my_role()`
 - INSERT tilladt for: admin, jaeger_medlem, ejer, forvalter, bb_direktoer
 - UPDATE/DELETE: admin/jaeger_medlem/bb_direktoer (alle), ejer/forvalter (egne)
 - Komplet sæt RLS policies for `event_signups` og `event_comments`
+- `profiles_select_all` policy tilføjet (brugere kunne ikke læse profiler)
+- Verificeret med API-test: SELECT, INSERT, DELETE virker for jaeger_medlem
 
 ### SQL kørt
 - `create_channel_with_members()` — SECURITY DEFINER funktion til kanal-oprettelse
 - DROP + CREATE policy på `hunt_events` — åben SELECT for alle authenticated users
-- `fix_hunt_events_rls.sql` — komplet RLS oprydning for hunt_events, event_signups, event_comments
+- `fix_hunt_events_rls_v2.sql` — komplet RLS oprydning med get_my_role() funktion
+- INSERT INTO profiles for testjager@jagtapp.dk (manglede profil-række)
 
 ---
 

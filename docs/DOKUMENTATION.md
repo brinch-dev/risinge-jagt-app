@@ -1,6 +1,6 @@
 # Risinge Jagtvæsen — App Dokumentation
 
-**Version:** 2.4.7
+**Version:** 2.4.8
 **Opdateret:** 2026-05-23
 **Platforme:** Android (APK) + Web (Firebase Hosting)
 **Backend:** Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)
@@ -181,9 +181,10 @@ Roller styres dynamisk via `roles`-tabellen. Admin kan oprette, redigere og slet
 | `fcm_tokens` | Push notification tokens |
 
 ### Vigtige RLS-funktioner
+- `get_my_role()` — SECURITY DEFINER funktion der returnerer brugerens rolle (omgår profiles RLS i subqueries)
 - `can_access_channel(channel_id, user_id)` — SECURITY DEFINER funktion der tjekker kanal-adgang uden nested RLS
 - `create_channel_with_members(p_name, p_type, p_member_ids)` — SECURITY DEFINER funktion til kanal-oprettelse (bypasser channel_members RLS)
-- `hunt_events` SELECT policy: `USING (true)` for alle authenticated users (ikke rolle-begrænset)
+- `hunt_events` policies bruger `get_my_role()` til rolle-check i INSERT/UPDATE/DELETE
 
 ---
 
