@@ -30,8 +30,9 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
     final signupsAsync = ref.watch(eventSignupsProvider);
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
 
-    final canSeeAll = profile?.canSeeAllEvents ?? false;
-    final myEventIds = !canSeeAll && currentUserId != null
+    final profileLoaded = profile != null;
+    final canSeeAll = profile?.canSeeAllEvents ?? true;
+    final myEventIds = !canSeeAll && profileLoaded && currentUserId != null
         ? (signupsAsync.value ?? [])
             .where((s) => s.userId == currentUserId && s.isAttending)
             .map((s) => s.eventId)
@@ -39,7 +40,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
         : <String>{};
 
     List<HuntEvent> filterEvents(List<HuntEvent> events) {
-      if (canSeeAll) return events;
+      if (canSeeAll || !profileLoaded) return events;
       return events.where((e) => myEventIds.contains(e.id)).toList();
     }
 
