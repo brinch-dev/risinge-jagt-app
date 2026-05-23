@@ -158,7 +158,7 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
-## Session 10: 2026-05-22/23 — v2.4.0 → v2.4.6
+## Session 10: 2026-05-22/23 — v2.4.0 → v2.4.7
 
 ### Dashboard redesign
 - Sort/hvid tema på alle dashboard widgets (mørke kort 0xFF1A1A1A med hvid tekst)
@@ -173,9 +173,20 @@ Kronologisk oversigt over alle udviklingssessioner.
 - **Chat kanal-oprettelse fejlede for ikke-admin (42501)**: `channel_members` INSERT blokeret af RLS. Oprettet SECURITY DEFINER funktion `create_channel_with_members()` og opdateret `createChannel` til at bruge `client.rpc()`.
 - **Kamera/medie-upload virkede ikke**: Manglende Android permissions (CAMERA, READ_MEDIA_IMAGES, READ_MEDIA_VIDEO). Tilføjet til AndroidManifest.xml.
 
+### Realtime events (v2.4.7)
+- Events provider lytter nu på `hunt_events` via Supabase Realtime
+- Alle brugere ser oprettede/slettede/redigerede events live uden genstart
+
+### RLS-oprydning (v2.4.7)
+- Komplet sæt RLS policies for `hunt_events` (SELECT/INSERT/UPDATE/DELETE)
+- INSERT tilladt for: admin, jaeger_medlem, ejer, forvalter, bb_direktoer
+- UPDATE/DELETE: admin/jaeger_medlem/bb_direktoer (alle), ejer/forvalter (egne)
+- Komplet sæt RLS policies for `event_signups` og `event_comments`
+
 ### SQL kørt
 - `create_channel_with_members()` — SECURITY DEFINER funktion til kanal-oprettelse
 - DROP + CREATE policy på `hunt_events` — åben SELECT for alle authenticated users
+- `fix_hunt_events_rls.sql` — komplet RLS oprydning for hunt_events, event_signups, event_comments
 
 ---
 

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jagt_app/bootstrap.dart';
 import 'package:jagt_app/models/hunt_event.dart';
 
@@ -6,9 +7,29 @@ final eventsProvider =
     AsyncNotifierProvider<EventsNotifier, List<HuntEvent>>(EventsNotifier.new);
 
 class EventsNotifier extends AsyncNotifier<List<HuntEvent>> {
+  RealtimeChannel? _channel;
+
   @override
   Future<List<HuntEvent>> build() async {
-    return _fetchEvents();
+    final data = await _fetchEvents();
+    _subscribeRealtime();
+    ref.onDispose(() => _channel?.unsubscribe());
+    return data;
+  }
+
+  void _subscribeRealtime() {
+    final client = ref.read(supabaseProvider);
+    _channel = client
+        .channel('hunt_events_changes')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'hunt_events',
+          callback: (_) async {
+            state = AsyncData(await _fetchEvents());
+          },
+        )
+        .subscribe();
   }
 
   Future<List<HuntEvent>> _fetchEvents() async {
