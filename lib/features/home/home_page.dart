@@ -131,18 +131,6 @@ class HomePage extends ConsumerWidget {
           ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        title: Text(
-          hero?.title ?? 'Risinge Jagtvæsen',
-          style: TextStyle(
-            color: cs.onPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-            shadows: const [
-              Shadow(blurRadius: 12, color: Colors.black),
-              Shadow(blurRadius: 24, color: Colors.black87),
-            ],
-          ),
-        ),
         background: Stack(
           fit: StackFit.expand,
           children: [
