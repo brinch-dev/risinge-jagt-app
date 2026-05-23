@@ -2,7 +2,7 @@ name: jagt_app
 description: "Jagt hunting app with Flutter + Supabase"
 publish_to: 'none'
 
-version: 2.4.8+42
+version: 2.5.0+43
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

@@ -11,6 +11,7 @@ import 'package:jagt_app/providers/event_signup_provider.dart';
 import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:jagt_app/features/admin/presentation/pages/manage_homepage_page.dart';
 import 'package:jagt_app/features/home/home_shell.dart';
+import 'package:jagt_app/features/calendar/presentation/pages/event_detail_page.dart';
 import 'package:jagt_app/bootstrap.dart';
 
 final _weatherProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
@@ -180,10 +181,7 @@ class HomePage extends ConsumerWidget {
       case 'info_cards':
         return const SizedBox.shrink();
       case 'next_event':
-        return GestureDetector(
-          onTap: () => _goToTab(ref, 2),
-          child: _NextEventBlock(ref: ref),
-        );
+        return _NextEventBlock(ref: ref);
       case 'event_stats':
         return GestureDetector(
           onTap: () => _goToTab(ref, 2),
@@ -192,10 +190,7 @@ class HomePage extends ConsumerWidget {
       case 'weather':
         return _WeatherBlock(ref: ref);
       case 'my_reservations':
-        return GestureDetector(
-          onTap: () => _goToTab(ref, 1),
-          child: _MyReservationsBlock(ref: ref),
-        );
+        return _MyReservationsBlock(ref: ref);
       case 'recent_chat':
         return GestureDetector(
           onTap: () => _goToTab(ref, 3),
@@ -281,7 +276,16 @@ class _NextEventBlock extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
+      child: GestureDetector(
+        onTap: event != null
+            ? () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EventDetailPage(event: event),
+                  ),
+                )
+            : null,
+        child: Card(
         color: const Color(0xFF1A1A1A),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         child: Padding(
@@ -331,6 +335,7 @@ class _NextEventBlock extends StatelessWidget {
           ),
         ),
       ),
+      ),
     );
   }
 }
@@ -344,8 +349,6 @@ class _EventStatsBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final upcoming = ref.watch(upcomingEventsProvider);
-    final signups = ref.watch(eventSignupsProvider).value ?? [];
-    final totalAttending = signups.where((s) => s.isAttending).length;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -362,7 +365,7 @@ class _EventStatsBlock extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.people, color: Colors.white, size: 24),
+                child: const Icon(Icons.event_note, color: Colors.white, size: 24),
               ),
               const SizedBox(width: 14),
               Column(
@@ -380,10 +383,6 @@ class _EventStatsBlock extends StatelessWidget {
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
                           color: Colors.white)),
-                  if (upcoming.isNotEmpty)
-                    Text('$totalAttending tilmeldte',
-                        style: const TextStyle(
-                            fontSize: 13, color: Color(0xFFBBBBBB))),
                 ],
               ),
             ],
@@ -620,39 +619,55 @@ class _MyReservationsBlock extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ...reservations.take(3).map((r) {
+                  ...reservations.take(5).map((r) {
                     final tower = r['towers'] as Map<String, dynamic>?;
-                    final event = r['hunt_events'] as Map<String, dynamic>?;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.chevron_right,
-                              size: 16, color: Color(0xFF888888)),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              '${tower?['name'] ?? '?'} — ${event?['title'] ?? '?'}',
-                              style: const TextStyle(
-                                  fontSize: 14, color: Colors.white),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                    final eventData = r['hunt_events'] as Map<String, dynamic>?;
+                    final allEvents = ref.watch(eventsProvider).value ?? [];
+                    final eventId = r['event_id'] as String?;
+                    final matchedEvent = eventId != null
+                        ? allEvents.where((e) => e.id == eventId).firstOrNull
+                        : null;
+                    return GestureDetector(
+                      onTap: matchedEvent != null
+                          ? () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      EventDetailPage(event: matchedEvent),
+                                ),
+                              )
+                          : null,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.chevron_right,
+                                size: 16, color: Color(0xFF888888)),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                '${tower?['name'] ?? '?'} — ${eventData?['title'] ?? '?'}',
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                          if (event?['date'] != null)
-                            Text(
-                              DateFormat('d/M').format(
-                                  DateTime.parse(event!['date'] as String)),
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFFBBBBBB)),
-                            ),
-                        ],
+                            if (eventData?['date'] != null)
+                              Text(
+                                DateFormat('d/M').format(
+                                    DateTime.parse(eventData!['date'] as String)),
+                                style: const TextStyle(
+                                    fontSize: 12, color: Color(0xFFBBBBBB)),
+                              ),
+                          ],
+                        ),
                       ),
                     );
                   }),
-                  if (reservations.length > 3)
+                  if (reservations.length > 5)
                     Text(
-                      '+${reservations.length - 3} mere',
+                      '+${reservations.length - 5} mere',
                       style: const TextStyle(
                           fontSize: 12, color: Color(0xFF999999)),
                     ),

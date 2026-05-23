@@ -158,7 +158,7 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
-## Session 10: 2026-05-22/23 — v2.4.0 → v2.4.8
+## Session 10: 2026-05-22/23 — v2.4.0 → v2.5.0
 
 ### Dashboard redesign
 - Sort/hvid tema på alle dashboard widgets (mørke kort 0xFF1A1A1A med hvid tekst)
@@ -186,11 +186,20 @@ Kronologisk oversigt over alle udviklingssessioner.
 - `profiles_select_all` policy tilføjet (brugere kunne ikke læse profiler)
 - Verificeret med API-test: SELECT, INSERT, DELETE virker for jaeger_medlem
 
+### Nye features (v2.5.0)
+- Næste event widget navigerer til event detaljer i stedet for kalender
+- Kommende reservationer: limit 5 og klik åbner det specifikke event
+- Chat kanal-beskrivelse: admin kan tilføje beskrivelse til generelle kanaler (nyt `description` felt)
+- Event-statistik widget viser kun antal kommende (fjernet tilmeldte-antal)
+- Vejrdata på event-oprettelsesside: sol op/ned og temperatur baseret på jagtområdets koordinater
+
 ### SQL kørt
 - `create_channel_with_members()` — SECURITY DEFINER funktion til kanal-oprettelse
 - DROP + CREATE policy på `hunt_events` — åben SELECT for alle authenticated users
 - `fix_hunt_events_rls_v2.sql` — komplet RLS oprydning med get_my_role() funktion
 - INSERT INTO profiles for testjager@jagtapp.dk (manglede profil-række)
+- ALTER TABLE chat_channels ADD COLUMN description TEXT
+- Fix app_notifications og notification_reads RLS policies
 
 ---
 

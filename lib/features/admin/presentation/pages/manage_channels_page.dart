@@ -134,6 +134,7 @@ class EditChannelPage extends ConsumerStatefulWidget {
 
 class _EditChannelPageState extends ConsumerState<EditChannelPage> {
   late final TextEditingController _nameCtrl;
+  late final TextEditingController _descCtrl;
   late List<String> _selectedRoles;
   bool _isNew = false;
 
@@ -143,6 +144,8 @@ class _EditChannelPageState extends ConsumerState<EditChannelPage> {
     _isNew = widget.channel == null;
     _nameCtrl = TextEditingController(
         text: widget.channel?['name'] as String? ?? '');
+    _descCtrl = TextEditingController(
+        text: widget.channel?['description'] as String? ?? '');
     _selectedRoles = List<String>.from(
         widget.channel?['required_roles'] as List? ?? []);
   }
@@ -150,6 +153,7 @@ class _EditChannelPageState extends ConsumerState<EditChannelPage> {
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _descCtrl.dispose();
     super.dispose();
   }
 
@@ -187,6 +191,16 @@ class _EditChannelPageState extends ConsumerState<EditChannelPage> {
                       border: OutlineInputBorder(),
                       hintText: 'F.eks. Jagt-snak',
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _descCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Beskrivelse (valgfrit)',
+                      border: OutlineInputBorder(),
+                      hintText: 'Hvad bruges denne kanal til?',
+                    ),
+                    maxLines: 2,
                   ),
                 ],
               ),
@@ -275,6 +289,8 @@ class _EditChannelPageState extends ConsumerState<EditChannelPage> {
 
     final client = ref.read(supabaseProvider);
 
+    final desc = _descCtrl.text.trim();
+
     if (_isNew) {
       final userId = client.auth.currentUser!.id;
       await client.from('chat_channels').insert({
@@ -282,11 +298,13 @@ class _EditChannelPageState extends ConsumerState<EditChannelPage> {
         'type': 'general',
         'created_by': userId,
         'required_roles': _selectedRoles,
+        'description': desc.isEmpty ? null : desc,
       });
     } else {
       await client.from('chat_channels').update({
         'name': name,
         'required_roles': _selectedRoles,
+        'description': desc.isEmpty ? null : desc,
       }).eq('id', widget.channel!['id']);
     }
 

@@ -157,13 +157,23 @@ class _ChannelTile extends StatelessWidget {
         ),
       ),
       title: Text(channel.name),
-      subtitle: channel.lastMessage != null
-          ? Text(
-              channel.lastMessage!,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (channel.isGeneral && channel.description != null && channel.description!.isNotEmpty)
+            Text(
+              channel.description!,
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-            )
-          : const Text('Ingen beskeder endnu'),
+            ),
+          Text(
+            channel.lastMessage ?? 'Ingen beskeder endnu',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
       trailing: channel.lastMessageAt != null
           ? Text(
               timeago.format(channel.lastMessageAt!, locale: 'da'),

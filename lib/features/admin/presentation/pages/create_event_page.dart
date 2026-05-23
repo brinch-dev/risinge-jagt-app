@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jagt_app/providers/event_provider.dart';
@@ -27,11 +29,35 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   TimeOfDay _endTime = const TimeOfDay(hour: 16, minute: 0);
   bool _checkinEnabled = false;
   bool _isLoading = false;
+  Map<String, dynamic>? _weatherData;
+  bool _loadingWeather = false;
 
   @override
   void initState() {
     super.initState();
     _date = widget.selectedDate ?? DateTime.now();
+    _fetchWeather();
+  }
+
+  Future<void> _fetchWeather() async {
+    setState(() => _loadingWeather = true);
+    try {
+      final areas = ref.read(huntAreasProvider).value ?? [];
+      final lat = areas.isNotEmpty ? areas.first.centerLat : 55.3835;
+      final lng = areas.isNotEmpty ? areas.first.centerLng : 10.6100;
+      final dateStr = _date.toIso8601String().split('T').first;
+      final response = await http.get(Uri.parse(
+        'https://api.open-meteo.com/v1/forecast'
+        '?latitude=$lat&longitude=$lng'
+        '&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code'
+        '&timezone=Europe/Copenhagen'
+        '&start_date=$dateStr&end_date=$dateStr',
+      ));
+      if (response.statusCode == 200) {
+        setState(() => _weatherData = jsonDecode(response.body) as Map<String, dynamic>);
+      }
+    } catch (_) {}
+    if (mounted) setState(() => _loadingWeather = false);
   }
 
   @override
@@ -96,6 +122,74 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
     }
   }
 
+  Widget _buildWeatherCard() {
+    if (_loadingWeather) {
+      return const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+    if (_weatherData == null) return const SizedBox.shrink();
+
+    final daily = _weatherData!['daily'] as Map<String, dynamic>;
+    final sunrise = ((daily['sunrise'] as List).first as String).split('T').last;
+    final sunset = ((daily['sunset'] as List).first as String).split('T').last;
+    final tempMax = ((daily['temperature_2m_max'] as List).first as num).round();
+    final tempMin = ((daily['temperature_2m_min'] as List).first as num).round();
+
+    return Card(
+      color: const Color(0xFF1A1A1A),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.wb_sunny, color: Colors.amber, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Vejr d. ${DateFormat('d. MMM', 'da').format(_date)}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF999999),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _weatherInfo(Icons.thermostat, '$tempMin° / $tempMax°', 'Temp'),
+                _weatherInfo(Icons.wb_twilight, sunrise, 'Sol op'),
+                _weatherInfo(Icons.nightlight_round, sunset, 'Sol ned'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _weatherInfo(IconData icon, String value, String label) {
+    return Column(
+      children: [
+        Icon(icon, size: 18, color: const Color(0xFF999999)),
+        const SizedBox(height: 4),
+        Text(value,
+            style: const TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+        Text(label,
+            style: const TextStyle(fontSize: 10, color: Color(0xFF888888))),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,9 +227,17 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
                 firstDate: DateTime.now(),
                 lastDate: DateTime(2030),
               );
-              if (picked != null) setState(() => _date = picked);
+              if (picked != null) {
+                setState(() => _date = picked);
+                _fetchWeather();
+              }
             },
           ),
+          if (_weatherData != null || _loadingWeather) ...[
+            const SizedBox(height: 8),
+            _buildWeatherCard(),
+            const SizedBox(height: 8),
+          ],
           ListTile(
             leading: const Icon(Icons.access_time),
             title: const Text('Starttid'),

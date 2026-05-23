@@ -3,6 +3,7 @@ enum ChannelType { general, private, group }
 class ChatChannel {
   final String id;
   final String name;
+  final String? description;
   final ChannelType type;
   final String createdBy;
   final DateTime createdAt;
@@ -15,6 +16,7 @@ class ChatChannel {
   const ChatChannel({
     required this.id,
     required this.name,
+    this.description,
     required this.type,
     required this.createdBy,
     required this.createdAt,
@@ -29,6 +31,7 @@ class ChatChannel {
     return ChatChannel(
       id: json['id'] as String,
       name: json['name'] as String,
+      description: json['description'] as String?,
       type: ChannelType.values.firstWhere(
         (t) => t.name == json['type'],
         orElse: () => ChannelType.general,
