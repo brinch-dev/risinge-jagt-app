@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.5.0
+# Risinge Jagtvæsen v2.5.1
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -112,6 +112,10 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.5.1 (2026-05-23)
+- Generelle chat-kanaler viser kun beskrivelse (ikke sidst sendte besked)
+- Private/gruppe-kanaler viser stadig sidste besked
 
 ### v2.5.0 (2026-05-23)
 - Næste event widget navigerer til event detaljer (ikke kalender)
