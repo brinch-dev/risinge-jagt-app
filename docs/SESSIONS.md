@@ -158,7 +158,7 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
-## Session 10: 2026-05-22/23 — v2.4.0 → v2.5.0
+## Session 10: 2026-05-22/23 — v2.4.0 → v2.5.2
 
 ### Dashboard redesign
 - Sort/hvid tema på alle dashboard widgets (mørke kort 0xFF1A1A1A med hvid tekst)

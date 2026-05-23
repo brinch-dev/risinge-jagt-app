@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -10,9 +12,29 @@ import 'package:jagt_app/providers/event_comment_provider.dart';
 import 'package:jagt_app/providers/auth_provider.dart';
 import 'package:jagt_app/providers/admin_log_provider.dart';
 import 'package:jagt_app/providers/chat_provider.dart';
+import 'package:jagt_app/providers/map_provider.dart';
 import 'package:jagt_app/features/towers/presentation/pages/tower_reservation_page.dart';
 import 'package:jagt_app/features/admin/presentation/pages/edit_event_page.dart';
 import 'package:jagt_app/providers/event_provider.dart';
+
+final _eventWeatherFamily =
+    FutureProvider.family<Map<String, dynamic>?, ({DateTime date, double lat, double lng})>(
+        (ref, params) async {
+  try {
+    final dateStr = params.date.toIso8601String().split('T').first;
+    final response = await http.get(Uri.parse(
+      'https://api.open-meteo.com/v1/forecast'
+      '?latitude=${params.lat}&longitude=${params.lng}'
+      '&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min'
+      '&timezone=Europe/Copenhagen'
+      '&start_date=$dateStr&end_date=$dateStr',
+    ));
+    if (response.statusCode != 200) return null;
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  } catch (_) {
+    return null;
+  }
+});
 
 class EventDetailPage extends ConsumerStatefulWidget {
   final HuntEvent event;
@@ -123,6 +145,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
             ),
           ),
 
+          _buildEventWeather(context, ref),
           const SizedBox(height: 16),
           if (profile != null && !profile.isGuest) ...[
             Text('Din status', style: Theme.of(context).textTheme.titleMedium),
@@ -289,6 +312,66 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
           const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+
+  Widget _buildEventWeather(BuildContext context, WidgetRef ref) {
+    final areas = ref.watch(huntAreasProvider).value ?? [];
+    final lat = areas.isNotEmpty ? areas.first.centerLat : 55.3835;
+    final lng = areas.isNotEmpty ? areas.first.centerLng : 10.6100;
+    final weatherAsync = ref.watch(
+        _eventWeatherFamily((date: widget.event.date, lat: lat, lng: lng)));
+
+    return weatherAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (data) {
+        if (data == null) return const SizedBox.shrink();
+        final daily = data['daily'] as Map<String, dynamic>;
+        final sunrise =
+            ((daily['sunrise'] as List).first as String).split('T').last;
+        final sunset =
+            ((daily['sunset'] as List).first as String).split('T').last;
+        final tempMax =
+            ((daily['temperature_2m_max'] as List).first as num).round();
+        final tempMin =
+            ((daily['temperature_2m_min'] as List).first as num).round();
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Card(
+            color: const Color(0xFF1A1A1A),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _weatherCol(Icons.thermostat, '$tempMin° / $tempMax°', 'Temp'),
+                  _weatherCol(Icons.wb_twilight, sunrise, 'Sol op'),
+                  _weatherCol(
+                      Icons.nightlight_round, sunset, 'Sol ned'),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _weatherCol(IconData icon, String value, String label) {
+    return Column(
+      children: [
+        Icon(icon, size: 18, color: const Color(0xFF999999)),
+        const SizedBox(height: 4),
+        Text(value,
+            style: const TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white)),
+        Text(label,
+            style: const TextStyle(fontSize: 10, color: Color(0xFF888888))),
+      ],
     );
   }
 

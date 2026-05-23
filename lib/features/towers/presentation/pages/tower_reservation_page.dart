@@ -10,6 +10,7 @@ import 'package:jagt_app/providers/map_provider.dart';
 import 'package:jagt_app/providers/auth_provider.dart';
 import 'package:jagt_app/providers/admin_log_provider.dart';
 import 'package:jagt_app/providers/area_boundary_provider.dart';
+import 'package:jagt_app/providers/event_signup_provider.dart';
 
 class TowerReservationPage extends ConsumerStatefulWidget {
   final HuntEvent event;
@@ -220,6 +221,24 @@ class _TowerReservationPageState extends ConsumerState<TowerReservationPage> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: const Text('Ledig', style: TextStyle(fontSize: 12, color: Colors.green)),
+        );
+      }
+      final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+      final isSignedUp = currentUserId != null &&
+          ref.read(eventSignupsProvider.notifier).isSignedUp(
+              widget.event.id, currentUserId);
+      if (!isSignedUp) {
+        return SizedBox(
+          height: 32,
+          child: OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.orange,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              textStyle: const TextStyle(fontSize: 13),
+            ),
+            onPressed: null,
+            child: const Text('Tilmeld event først'),
+          ),
         );
       }
       return SizedBox(

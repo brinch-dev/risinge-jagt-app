@@ -1,6 +1,6 @@
 # Risinge Jagtvæsen — App Dokumentation
 
-**Version:** 2.5.0
+**Version:** 2.5.2
 **Opdateret:** 2026-05-23
 **Platforme:** Android (APK) + Web (Firebase Hosting)
 **Backend:** Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)
