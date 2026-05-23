@@ -1,9 +1,23 @@
 -- =============================================
--- Fix hunt_events RLS policies
+-- Fix hunt_events RLS policies v2
+-- Bruger SECURITY DEFINER funktion til at omgå
+-- profiles RLS i subqueries
 -- Kør i Supabase SQL Editor
 -- =============================================
 
--- 1. Drop alle eksisterende policies på hunt_events (ryd op)
+-- 1. Opret SECURITY DEFINER funktion der returnerer brugerens rolle
+-- Denne omgår RLS på profiles-tabellen
+CREATE OR REPLACE FUNCTION get_my_role()
+RETURNS TEXT
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT role FROM profiles WHERE id = auth.uid();
+$$;
+
+-- 2. Drop alle eksisterende policies på hunt_events
 DO $$
 DECLARE
   pol RECORD;
@@ -15,59 +29,38 @@ BEGIN
   END LOOP;
 END $$;
 
--- 2. Sørg for at RLS er aktiveret
 ALTER TABLE hunt_events ENABLE ROW LEVEL SECURITY;
 
--- 3. SELECT: alle authenticated brugere kan se events
--- (app-side filtrerer baseret på rolle)
+-- 3. SELECT: alle authenticated
 CREATE POLICY "hunt_events_select"
   ON hunt_events FOR SELECT
   TO authenticated
   USING (true);
 
 -- 4. INSERT: roller der må oprette events
--- admin, jaeger_medlem, ejer, forvalter, bb_direktoer
 CREATE POLICY "hunt_events_insert"
   ON hunt_events FOR INSERT
   TO authenticated
   WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-        AND profiles.role IN ('admin', 'jaeger_medlem', 'ejer', 'forvalter', 'bb_direktoer')
-    )
+    get_my_role() IN ('admin', 'jaeger_medlem', 'ejer', 'forvalter', 'bb_direktoer')
   );
 
--- 5. UPDATE: admin/jaeger_medlem/bb_direktoer kan redigere alle,
---            ejer/forvalter kan redigere egne
+-- 5. UPDATE: admin/jaeger_medlem/bb_direktoer alle, ejer/forvalter egne
 CREATE POLICY "hunt_events_update"
   ON hunt_events FOR UPDATE
   TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-        AND (
-          profiles.role IN ('admin', 'jaeger_medlem', 'bb_direktoer')
-          OR (profiles.role IN ('ejer', 'forvalter') AND hunt_events.created_by = auth.uid())
-        )
-    )
+    get_my_role() IN ('admin', 'jaeger_medlem', 'bb_direktoer')
+    OR (get_my_role() IN ('ejer', 'forvalter') AND created_by = auth.uid())
   );
 
--- 6. DELETE: admin/jaeger_medlem/bb_direktoer kan slette alle,
---            ejer/forvalter kan slette egne
+-- 6. DELETE: same som update
 CREATE POLICY "hunt_events_delete"
   ON hunt_events FOR DELETE
   TO authenticated
   USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE profiles.id = auth.uid()
-        AND (
-          profiles.role IN ('admin', 'jaeger_medlem', 'bb_direktoer')
-          OR (profiles.role IN ('ejer', 'forvalter') AND hunt_events.created_by = auth.uid())
-        )
-    )
+    get_my_role() IN ('admin', 'jaeger_medlem', 'bb_direktoer')
+    OR (get_my_role() IN ('ejer', 'forvalter') AND created_by = auth.uid())
   );
 
 -- =============================================
@@ -87,25 +80,21 @@ END $$;
 
 ALTER TABLE event_signups ENABLE ROW LEVEL SECURITY;
 
--- Alle authenticated kan se tilmeldinger
 CREATE POLICY "event_signups_select"
   ON event_signups FOR SELECT
   TO authenticated
   USING (true);
 
--- Alle authenticated (ikke gæst) kan tilmelde sig
 CREATE POLICY "event_signups_insert"
   ON event_signups FOR INSERT
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
--- Brugere kan opdatere egne tilmeldinger
 CREATE POLICY "event_signups_update"
   ON event_signups FOR UPDATE
   TO authenticated
   USING (auth.uid() = user_id);
 
--- Brugere kan slette egne tilmeldinger
 CREATE POLICY "event_signups_delete"
   ON event_signups FOR DELETE
   TO authenticated
@@ -141,14 +130,47 @@ CREATE POLICY "event_comments_insert"
 CREATE POLICY "event_comments_delete"
   ON event_comments FOR DELETE
   TO authenticated
-  USING (auth.uid() = user_id OR EXISTS (
-    SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin'
-  ));
+  USING (auth.uid() = user_id OR get_my_role() = 'admin');
 
 -- =============================================
--- Verificer alle policies
+-- Fix profiles RLS - alle authenticated skal
+-- kunne læse egen profil
+-- =============================================
+
+-- Tilføj policy så brugere kan læse egen profil
+-- (hvis den ikke allerede eksisterer)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'profiles' AND policyname = 'profiles_select_own'
+  ) THEN
+    CREATE POLICY "profiles_select_own"
+      ON profiles FOR SELECT
+      TO authenticated
+      USING (id = auth.uid());
+  END IF;
+END $$;
+
+-- Tilføj policy så alle authenticated kan læse alle profiler
+-- (behøves for deltagerlister, chat, etc.)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE tablename = 'profiles' AND policyname = 'profiles_select_all'
+  ) THEN
+    CREATE POLICY "profiles_select_all"
+      ON profiles FOR SELECT
+      TO authenticated
+      USING (true);
+  END IF;
+END $$;
+
+-- =============================================
+-- Verificer
 -- =============================================
 SELECT tablename, policyname, cmd
 FROM pg_policies
-WHERE tablename IN ('hunt_events', 'event_signups', 'event_comments')
+WHERE tablename IN ('hunt_events', 'event_signups', 'event_comments', 'profiles')
 ORDER BY tablename, cmd;
