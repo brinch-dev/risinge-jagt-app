@@ -4,7 +4,7 @@ import 'package:jagt_app/app/router.dart';
 import 'package:jagt_app/app/theme.dart';
 
 class JagtApp extends ConsumerWidget {
-  const JagtApp({Key? key}) : super(key: key);
+  const JagtApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

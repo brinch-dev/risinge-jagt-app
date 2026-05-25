@@ -498,14 +498,63 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
   final _countCtrl = TextEditingController();
   final _shotsCtrl = TextEditingController();
   bool _shotsInitialized = false;
-  bool _isExpanded = false;
-  final _dropdownKey = GlobalKey<FormFieldState<String>>();
 
   @override
   void dispose() {
     _countCtrl.dispose();
     _shotsCtrl.dispose();
     super.dispose();
+  }
+
+  void _pickSpecies() {
+    final cs = Theme.of(context).colorScheme;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (_, scrollCtrl) => Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Vælg vildtart',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: cs.onSurface)),
+            ),
+            Expanded(
+              child: ListView(
+                controller: scrollCtrl,
+                children: gameSpeciesCategories.expand((cat) => [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Text(cat.name.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: cs.primary,
+                          letterSpacing: 1,
+                        )),
+                  ),
+                  ...cat.species.map((s) => ListTile(
+                        title: Text(s),
+                        dense: true,
+                        onTap: () {
+                          Navigator.pop(ctx);
+                          setState(() => _selectedSpecies = s);
+                        },
+                      )),
+                ]).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -520,264 +569,150 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
       _shotsInitialized = true;
     }
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          InkWell(
-            onTap: () => setState(() => _isExpanded = !_isExpanded),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: cs.primaryContainer.withValues(alpha: 0.4),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: cs.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(Icons.pets, size: 20, color: cs.primary),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 12),
+
+        // Add entry row
+        Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: GestureDetector(
+                onTap: _pickSpecies,
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    hintText: 'Vælg art...',
+                    border: const OutlineInputBorder(),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    suffixIcon: Icon(Icons.arrow_drop_down, color: cs.outline),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Text(
+                    _selectedSpecies ?? 'Vælg art...',
+                    style: TextStyle(
+                      color: _selectedSpecies != null ? cs.onSurface : cs.outline,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 80,
+              child: TextField(
+                controller: _countCtrl,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                decoration: const InputDecoration(
+                  hintText: 'Antal',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton.filled(
+              onPressed: _addEntry,
+              icon: const Icon(Icons.add),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Entries list
+        if (entries.isNotEmpty) ...[
+          Card(
+            child: Column(
+              children: [
+                for (int i = 0; i < entries.length; i++) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: Row(
                       children: [
-                        Text('Nedlagt vildt',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: cs.onSurface,
-                            )),
+                        Expanded(
+                          child: Text(entries[i].species,
+                              style: const TextStyle(fontSize: 14)),
+                        ),
                         Text(
-                          entries.isNotEmpty
-                              ? '${entries.length} arter — ${entries.fold<int>(0, (s, e) => s + e.count)} stk.'
-                              : 'Tryk for at registrere',
-                          style: TextStyle(fontSize: 12, color: cs.outline),
+                          '${entries[i].count}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: cs.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        SizedBox(
+                          width: 28,
+                          height: 28,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            iconSize: 16,
+                            icon: Icon(Icons.close, color: cs.error),
+                            onPressed: () => ref
+                                .read(gameBagProviderFamily(widget.eventId).notifier)
+                                .deleteEntry(entries[i].id),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  if (totalShots != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: cs.secondaryContainer,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.gps_fixed, size: 13, color: cs.onSecondaryContainer),
-                          const SizedBox(width: 4),
-                          Text('$totalShots',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: cs.onSecondaryContainer,
-                              )),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(width: 4),
-                  AnimatedRotation(
-                    turns: _isExpanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(Icons.expand_more, color: cs.outline),
+                  if (i < entries.length - 1)
+                    Divider(height: 1, indent: 16, endIndent: 16, color: cs.outlineVariant),
+                ],
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                    borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
                   ),
-                ],
-              ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total', style: TextStyle(fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                      Text('${entries.fold<int>(0, (sum, e) => sum + e.count)} stk.',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: cs.onSurface)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-
-          if (entries.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Column(
-                children: [
-                  for (int i = 0; i < entries.length; i++) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: cs.primaryContainer.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${entries[i].count}',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: cs.primary,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(entries[i].species,
-                                style: TextStyle(fontSize: 14, color: cs.onSurface)),
-                          ),
-                          SizedBox(
-                            width: 32,
-                            height: 32,
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              icon: Icon(Icons.close, size: 16, color: cs.outline),
-                              onPressed: () => ref
-                                  .read(gameBagProviderFamily(widget.eventId).notifier)
-                                  .deleteEntry(entries[i].id),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (i < entries.length - 1)
-                      Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
-                  ],
-                ],
-              ),
-            ),
-
-          if (entries.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Total vildt', style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
-                  Text('${entries.fold<int>(0, (sum, e) => sum + e.count)} stk.',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: cs.onSurface)),
-                ],
-              ),
-            ),
-
-          AnimatedSize(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
-            child: _isExpanded
-                ? Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        DropdownButtonFormField<String>(
-                          key: _dropdownKey,
-                          // ignore: deprecated_member_use
-                          value: _selectedSpecies,
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            labelText: 'Vælg vildtart',
-                            prefixIcon: Icon(Icons.search, size: 18, color: cs.outline),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                          ),
-                          items: gameSpeciesCategories.expand((cat) {
-                            return [
-                              DropdownMenuItem<String>(
-                                enabled: false,
-                                child: Text(cat.name.toUpperCase(),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      color: cs.primary,
-                                      fontSize: 11,
-                                      letterSpacing: 1,
-                                    )),
-                              ),
-                              ...cat.species.map((s) => DropdownMenuItem<String>(
-                                    value: s,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 8),
-                                      child: Text(s, style: const TextStyle(fontSize: 14)),
-                                    ),
-                                  )),
-                            ];
-                          }).toList(),
-                          onChanged: (val) {
-                            setState(() => _selectedSpecies = val);
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _countCtrl,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  labelText: 'Antal nedlagt',
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            FilledButton.icon(
-                              onPressed: _addEntry,
-                              icon: const Icon(Icons.add, size: 18),
-                              label: const Text('Tilføj'),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Divider(color: cs.outlineVariant.withValues(alpha: 0.4)),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                controller: _shotsCtrl,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  labelText: 'Samlet antal skud',
-                                  prefixIcon: Icon(Icons.gps_fixed, size: 18, color: cs.outline),
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            FilledButton.tonalIcon(
-                              onPressed: _saveTotalShots,
-                              icon: const Icon(Icons.save_outlined, size: 18),
-                              label: const Text('Gem'),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-
-          if (gameBagAsync.isLoading)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            ),
+          const SizedBox(height: 12),
         ],
-      ),
+
+        // Total shots
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _shotsCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Samlet antal skud for dagen',
+                  prefixIcon: Icon(Icons.gps_fixed, size: 18, color: cs.outline),
+                  border: const OutlineInputBorder(),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            FilledButton(
+              onPressed: _saveTotalShots,
+              child: const Text('Gem'),
+            ),
+          ],
+        ),
+        if (totalShots != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text('Registreret: $totalShots skud',
+                style: TextStyle(fontSize: 12, color: cs.outline)),
+          ),
+      ],
     );
   }
 
@@ -802,7 +737,6 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
           .addOrUpdateEntry(_selectedSpecies!, count);
       _countCtrl.clear();
       setState(() => _selectedSpecies = null);
-      _dropdownKey.currentState?.reset();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)

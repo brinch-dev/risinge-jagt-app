@@ -15,7 +15,7 @@ import 'package:jagt_app/providers/auth_provider.dart';
 class CreateEventPage extends ConsumerStatefulWidget {
   final DateTime? selectedDate;
 
-  const CreateEventPage({Key? key, this.selectedDate}) : super(key: key);
+  const CreateEventPage({super.key, this.selectedDate});
 
   @override
   ConsumerState<CreateEventPage> createState() => _CreateEventPageState();

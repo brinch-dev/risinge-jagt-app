@@ -15,10 +15,10 @@ class AreaDetailSheet extends ConsumerWidget {
   final UserProfile? profile;
 
   const AreaDetailSheet({
-    Key? key,
+    super.key,
     required this.area,
     required this.profile,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -15,7 +15,7 @@ final adminChannelsProvider =
 });
 
 class ManageChannelsPage extends ConsumerWidget {
-  const ManageChannelsPage({Key? key}) : super(key: key);
+  const ManageChannelsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -99,12 +99,12 @@ class ManageChannelsPage extends ConsumerWidget {
                       ],
                     ],
                   ),
-                  trailing: Row(
+                  trailing: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.chevron_right),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.drag_handle),
+                      Icon(Icons.chevron_right),
+                      SizedBox(width: 4),
+                      Icon(Icons.drag_handle),
                     ],
                   ),
                   onTap: () => Navigator.push(
@@ -126,7 +126,7 @@ class ManageChannelsPage extends ConsumerWidget {
 class EditChannelPage extends ConsumerStatefulWidget {
   final Map<String, dynamic>? channel;
 
-  const EditChannelPage({Key? key, required this.channel}) : super(key: key);
+  const EditChannelPage({super.key, required this.channel});
 
   @override
   ConsumerState<EditChannelPage> createState() => _EditChannelPageState();

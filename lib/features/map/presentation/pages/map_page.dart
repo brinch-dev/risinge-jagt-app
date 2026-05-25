@@ -24,7 +24,7 @@ import 'package:jagt_app/providers/event_boundary_provider.dart';
 import 'package:jagt_app/providers/area_boundary_provider.dart';
 
 class MapPage extends ConsumerStatefulWidget {
-  const MapPage({Key? key}) : super(key: key);
+  const MapPage({super.key});
 
   @override
   ConsumerState<MapPage> createState() => _MapPageState();
@@ -307,7 +307,9 @@ class _MapPageState extends ConsumerState<MapPage> {
       if (event.areaId == null) continue;
       if (event.date.year != now.year ||
           event.date.month != now.month ||
-          event.date.day != now.day) continue;
+          event.date.day != now.day) {
+        continue;
+      }
 
       if (event.startTime != null && event.endTime != null) {
         final startParts = event.startTime!.split(':');
@@ -776,13 +778,13 @@ class _MapPageState extends ConsumerState<MapPage> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 color: Colors.green.shade700,
-                child: SafeArea(
+                child: const SafeArea(
                   bottom: false,
                   child: Row(
                     children: [
-                      const Icon(Icons.gps_fixed, color: Colors.white, size: 16),
-                      const SizedBox(width: 8),
-                      const Text(
+                      Icon(Icons.gps_fixed, color: Colors.white, size: 16),
+                      SizedBox(width: 8),
+                      Text(
                         'GPS aktiv — du er i jagtområdet',
                         style: TextStyle(color: Colors.white, fontSize: 13),
                       ),

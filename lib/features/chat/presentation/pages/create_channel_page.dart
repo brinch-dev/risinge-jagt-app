@@ -6,7 +6,7 @@ import 'package:jagt_app/models/chat_channel.dart';
 import 'package:jagt_app/features/chat/presentation/pages/chat_page.dart';
 
 class CreateChannelPage extends ConsumerStatefulWidget {
-  const CreateChannelPage({Key? key}) : super(key: key);
+  const CreateChannelPage({super.key});
 
   @override
   ConsumerState<CreateChannelPage> createState() => _CreateChannelPageState();

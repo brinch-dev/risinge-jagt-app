@@ -8,7 +8,7 @@ import 'package:jagt_app/providers/map_provider.dart' show huntAreasProvider;
 class EditEventPage extends ConsumerStatefulWidget {
   final HuntEvent event;
 
-  const EditEventPage({Key? key, required this.event}) : super(key: key);
+  const EditEventPage({super.key, required this.event});
 
   @override
   ConsumerState<EditEventPage> createState() => _EditEventPageState();

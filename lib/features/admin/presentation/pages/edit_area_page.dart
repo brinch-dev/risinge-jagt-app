@@ -10,7 +10,7 @@ import 'package:jagt_app/providers/area_boundary_provider.dart';
 class EditAreaPage extends ConsumerStatefulWidget {
   final HuntArea area;
 
-  const EditAreaPage({Key? key, required this.area}) : super(key: key);
+  const EditAreaPage({super.key, required this.area});
 
   @override
   ConsumerState<EditAreaPage> createState() => _EditAreaPageState();

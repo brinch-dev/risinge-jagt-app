@@ -14,7 +14,7 @@ import 'package:jagt_app/providers/admin_log_provider.dart';
 import 'package:jagt_app/providers/area_boundary_provider.dart';
 
 class CreateAreaPage extends ConsumerStatefulWidget {
-  const CreateAreaPage({Key? key}) : super(key: key);
+  const CreateAreaPage({super.key});
 
   @override
   ConsumerState<CreateAreaPage> createState() => _CreateAreaPageState();

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:jagt_app/providers/role_provider.dart';
 
 class ManageRolesPage extends ConsumerWidget {
-  const ManageRolesPage({Key? key}) : super(key: key);
+  const ManageRolesPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -127,7 +127,7 @@ class ManageRolesPage extends ConsumerWidget {
 
 class EditRolePage extends ConsumerStatefulWidget {
   final AppRole role;
-  const EditRolePage({Key? key, required this.role}) : super(key: key);
+  const EditRolePage({super.key, required this.role});
 
   @override
   ConsumerState<EditRolePage> createState() => _EditRolePageState();
@@ -202,7 +202,7 @@ class _EditRolePageState extends ConsumerState<EditRolePage> {
                         await ref
                             .read(rolesProvider.notifier)
                             .updateRole(widget.role.id, label);
-                        if (mounted) {
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Rolle opdateret')),
                           );
@@ -288,7 +288,7 @@ class _EditRolePageState extends ConsumerState<EditRolePage> {
               await ref
                   .read(rolesProvider.notifier)
                   .deleteRole(widget.role.id);
-              if (mounted) Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Slet'),

@@ -4,7 +4,7 @@ import 'package:jagt_app/providers/notification_provider.dart';
 import 'package:jagt_app/features/notifications/presentation/pages/notifications_page.dart';
 
 class NotificationBell extends ConsumerWidget {
-  const NotificationBell({Key? key}) : super(key: key);
+  const NotificationBell({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

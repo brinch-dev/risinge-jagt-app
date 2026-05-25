@@ -10,7 +10,7 @@ import 'package:jagt_app/features/admin/presentation/pages/manage_homepage_page.
 import 'package:jagt_app/features/admin/presentation/pages/manage_channels_page.dart';
 
 class AdminPanelPage extends ConsumerWidget {
-  const AdminPanelPage({Key? key}) : super(key: key);
+  const AdminPanelPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

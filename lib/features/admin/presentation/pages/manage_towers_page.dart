@@ -11,7 +11,7 @@ import 'package:jagt_app/providers/map_provider.dart';
 
 class ManageTowersPage extends ConsumerStatefulWidget {
   final HuntArea area;
-  const ManageTowersPage({Key? key, required this.area}) : super(key: key);
+  const ManageTowersPage({super.key, required this.area});
 
   @override
   ConsumerState<ManageTowersPage> createState() => _ManageTowersPageState();

@@ -105,6 +105,7 @@ class AppUpdateService {
               Navigator.pop(ctx);
               final prefs = await SharedPreferences.getInstance();
               await prefs.remove(_dismissedVersionKey);
+              if (!context.mounted) return;
               _downloadAndInstall(context, downloadUrl);
             },
             child: const Text('Opdater nu'),

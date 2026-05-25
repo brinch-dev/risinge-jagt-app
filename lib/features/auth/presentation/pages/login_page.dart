@@ -6,7 +6,7 @@ import 'package:jagt_app/providers/auth_provider.dart';
 import 'package:jagt_app/services/push_notification_service.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();

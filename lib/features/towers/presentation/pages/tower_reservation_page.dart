@@ -14,7 +14,7 @@ import 'package:jagt_app/providers/event_signup_provider.dart';
 
 class TowerReservationPage extends ConsumerStatefulWidget {
   final HuntEvent event;
-  const TowerReservationPage({Key? key, required this.event}) : super(key: key);
+  const TowerReservationPage({super.key, required this.event});
 
   @override
   ConsumerState<TowerReservationPage> createState() =>

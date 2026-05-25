@@ -334,6 +334,29 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
+## Session 15: 2026-05-26 — v2.6.2
+
+### Hvad blev lavet
+- **Private chat viser korrekt navn**: private 1-1 kanaler viser nu den anden persons navn i stedet for dit eget
+- **Vildtart placeholder**: bottom sheet picker har "Vælg art..." placeholder
+- **Antal-felt forbedret**: bredere felt (80px) med synlig placeholder "Antal"
+- **Kode-oprydning**: 25+ analyzer issues rettet
+  - `Key? key` → `super.key` i alle widget-constructors
+  - `const` tilføjet hvor muligt (ColorScheme, Row, BorderSide)
+  - Unused imports fjernet (dart:io)
+  - `package_info_plus` og `path_provider` tilføjet som direkte dependencies
+- **0 analyzer issues** — fuldstændig ren codebase
+
+### Filer ændret
+- `lib/providers/chat_provider.dart` — query channel_members for at finde anden persons navn
+- `lib/features/calendar/presentation/pages/event_detail_page.dart` — placeholder og feltbredde
+- `lib/app/app.dart` — super.key
+- `lib/app/theme.dart` — const ColorScheme, const BorderSide
+- `lib/features/admin/presentation/pages/*.dart` — super.key, const, unused imports
+- `pubspec.yaml` — version 2.6.2+57, tilføjet package_info_plus + path_provider
+
+---
+
 ## Kendte begrænsninger og fremtidige opgaver
 
 ### Begrænsninger

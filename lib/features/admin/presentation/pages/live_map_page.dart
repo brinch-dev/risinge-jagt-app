@@ -7,7 +7,7 @@ import 'package:jagt_app/providers/live_location_provider.dart';
 import 'package:jagt_app/providers/area_boundary_provider.dart';
 
 class LiveMapPage extends ConsumerWidget {
-  const LiveMapPage({Key? key}) : super(key: key);
+  const LiveMapPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

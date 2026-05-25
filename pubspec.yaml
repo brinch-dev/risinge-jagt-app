@@ -2,7 +2,7 @@ name: jagt_app
 description: "Jagt hunting app with Flutter + Supabase"
 publish_to: 'none'
 
-version: 2.6.1+56
+version: 2.6.2+57
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -62,6 +62,8 @@ dependencies:
   firebase_messaging: ^16.2.1
   video_player: ^2.11.1
   open_filex: ^4.7.0
+  package_info_plus: ^9.0.1
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

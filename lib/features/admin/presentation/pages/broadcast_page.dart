@@ -164,6 +164,7 @@ class _BroadcastPageState extends ConsumerState<BroadcastPage> {
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.event),
             ),
+            // ignore: deprecated_member_use
             value: _selectedEventId,
             items: [
               const DropdownMenuItem(

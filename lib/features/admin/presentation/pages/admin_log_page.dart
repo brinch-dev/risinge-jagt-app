@@ -5,7 +5,7 @@ import 'package:jagt_app/providers/admin_log_provider.dart';
 import 'package:jagt_app/models/admin_log_entry.dart';
 
 class AdminLogPage extends ConsumerWidget {
-  const AdminLogPage({Key? key}) : super(key: key);
+  const AdminLogPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

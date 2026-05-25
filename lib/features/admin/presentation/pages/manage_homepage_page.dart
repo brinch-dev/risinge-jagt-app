@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -36,7 +35,7 @@ const _blockTypeIcons = {
 };
 
 class ManageHomepagePage extends ConsumerWidget {
-  const ManageHomepagePage({Key? key}) : super(key: key);
+  const ManageHomepagePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -180,7 +179,7 @@ class EditBlockPage extends ConsumerStatefulWidget {
   final HomeBlock? block;
   final String? newType;
 
-  const EditBlockPage({Key? key, this.block, this.newType}) : super(key: key);
+  const EditBlockPage({super.key, this.block, this.newType});
 
   @override
   ConsumerState<EditBlockPage> createState() => _EditBlockPageState();

@@ -7,7 +7,6 @@ import 'package:jagt_app/models/user_profile.dart';
 import 'package:jagt_app/providers/auth_provider.dart';
 import 'package:jagt_app/providers/homepage_provider.dart';
 import 'package:jagt_app/providers/event_provider.dart';
-import 'package:jagt_app/providers/event_signup_provider.dart';
 import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
 import 'package:jagt_app/features/admin/presentation/pages/manage_homepage_page.dart';
 import 'package:jagt_app/features/home/home_shell.dart';
@@ -58,7 +57,7 @@ final _recentMessagesProvider =
 });
 
 class HomePage extends ConsumerWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

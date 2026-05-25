@@ -15,10 +15,10 @@ class ChatPage extends ConsumerStatefulWidget {
   final String channelName;
 
   const ChatPage({
-    Key? key,
+    super.key,
     required this.channelId,
     required this.channelName,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();

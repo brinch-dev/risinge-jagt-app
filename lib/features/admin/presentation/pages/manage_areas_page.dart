@@ -8,7 +8,7 @@ import 'package:jagt_app/features/admin/presentation/pages/edit_area_page.dart';
 import 'package:jagt_app/features/admin/presentation/pages/manage_towers_page.dart';
 
 class ManageAreasPage extends ConsumerWidget {
-  const ManageAreasPage({Key? key}) : super(key: key);
+  const ManageAreasPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

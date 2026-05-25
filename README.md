@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.6.1
+# Risinge Jagtvæsen v2.6.2
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -112,6 +112,14 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.6.2 (2026-05-26)
+- Fix: Private chatkanaler viser nu den anden persons navn (ikke dit eget)
+- Fix: Vildtart-felt har placeholder "Vælg art..." med bottom sheet picker
+- Fix: Antal-felt bredere med synlig placeholder
+- Kode-oprydning: 25+ analyzer issues rettet (super.key, const, unused imports)
+- Tilføjet package_info_plus og path_provider som direkte dependencies
+- 0 analyzer issues
 
 ### v2.6.1 (2026-05-25)
 - Fix: Vildtudbytte dropdown, antal og skud virker nu korrekt (input-felter flyttet ud af async builder)

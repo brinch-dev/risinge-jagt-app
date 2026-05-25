@@ -122,7 +122,7 @@ class PushNotificationService {
   void _navigateToChat(String channelId, String channelName) {
     Future.delayed(const Duration(milliseconds: 500), () {
       final ctx = navigatorKey.currentContext;
-      if (ctx == null) return;
+      if (ctx == null || !ctx.mounted) return;
 
       GoRouter.of(ctx).push(
         '/chat/$channelId?name=${Uri.encodeComponent(channelName)}',

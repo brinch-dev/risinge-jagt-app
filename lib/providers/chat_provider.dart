@@ -4,7 +4,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jagt_app/bootstrap.dart';
 import 'package:jagt_app/models/chat_channel.dart';
 import 'package:jagt_app/models/chat_message.dart';
-import 'package:jagt_app/models/user_profile.dart';
 import 'package:jagt_app/providers/auth_provider.dart';
 
 final chatChannelsProvider =
@@ -107,11 +106,53 @@ class ChatChannelsNotifier extends AsyncNotifier<List<ChatChannel>> {
 
     final parsed = (generalChannels as List).map((e) => ChatChannel.fromJson(e)).toList();
     final visible = parsed.where((c) => c.isVisibleToRole(userRole)).toList();
-    final all = [
-      ...visible,
-      ...(privateChannels).map((e) => ChatChannel.fromJson(e)),
-    ];
-    return all;
+
+    final privateList = (privateChannels).map((e) => ChatChannel.fromJson(e)).toList();
+
+    // For private 1-1 channels, show the other person's name
+    final privateIds = privateList
+        .where((c) => c.type == ChannelType.private)
+        .map((c) => c.id)
+        .toList();
+    Map<String, String> otherNames = {};
+    if (privateIds.isNotEmpty) {
+      final members = await client
+          .from('channel_members')
+          .select('channel_id, user_id, profiles(display_name)')
+          .inFilter('channel_id', privateIds)
+          .neq('user_id', userId);
+      for (final m in members as List) {
+        final chId = m['channel_id'] as String;
+        final profile = m['profiles'] as Map<String, dynamic>?;
+        if (profile != null) {
+          otherNames[chId] = profile['display_name'] as String? ?? '';
+        }
+      }
+    }
+
+    final fixedPrivate = privateList.map((c) {
+      if (c.type == ChannelType.private && otherNames.containsKey(c.id)) {
+        final otherName = otherNames[c.id]!;
+        if (otherName.isNotEmpty) {
+          return ChatChannel(
+            id: c.id,
+            name: otherName,
+            description: c.description,
+            type: c.type,
+            createdBy: c.createdBy,
+            createdAt: c.createdAt,
+            lastMessage: c.lastMessage,
+            lastMessageAt: c.lastMessageAt,
+            requiredRoles: c.requiredRoles,
+            isPredefined: c.isPredefined,
+            sortOrder: c.sortOrder,
+          );
+        }
+      }
+      return c;
+    }).toList();
+
+    return [...visible, ...fixedPrivate];
   }
 
   Future<ChatChannel> createChannel(

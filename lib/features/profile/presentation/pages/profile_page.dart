@@ -9,7 +9,7 @@ import 'package:jagt_app/services/push_notification_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   ConsumerState<ProfilePage> createState() => _ProfilePageState();
@@ -37,7 +37,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               if (!kIsWeb) await PushNotificationService().removeToken();
               final authService = ref.read(authServiceProvider);
               await authService.signOut();
-              if (mounted) context.go('/login');
+              if (context.mounted) context.go('/login');
             },
           ),
         ],

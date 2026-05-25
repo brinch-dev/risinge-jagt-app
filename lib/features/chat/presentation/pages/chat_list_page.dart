@@ -8,7 +8,7 @@ import 'package:jagt_app/features/chat/presentation/pages/create_channel_page.da
 import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
 
 class ChatListPage extends ConsumerWidget {
-  const ChatListPage({Key? key}) : super(key: key);
+  const ChatListPage({super.key});
 
   Future<bool> _confirmDelete(BuildContext context, ChatChannel channel) async {
     return await showDialog<bool>(

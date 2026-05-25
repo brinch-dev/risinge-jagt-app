@@ -8,7 +8,7 @@ import 'package:jagt_app/providers/auth_provider.dart';
 import 'package:jagt_app/providers/admin_log_provider.dart';
 
 class NotificationsPage extends ConsumerWidget {
-  const NotificationsPage({Key? key}) : super(key: key);
+  const NotificationsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

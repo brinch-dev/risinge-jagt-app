@@ -18,7 +18,7 @@ class TabIndexNotifier extends Notifier<int> {
 }
 
 class HomeShell extends ConsumerStatefulWidget {
-  const HomeShell({Key? key}) : super(key: key);
+  const HomeShell({super.key});
 
   @override
   ConsumerState<HomeShell> createState() => _HomeShellState();
@@ -31,7 +31,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   Widget build(BuildContext context) {
     if (!_updateChecked) {
       _updateChecked = true;
-      Future.microtask(() => AppUpdateService.checkForUpdate(context));
+      Future.microtask(() {
+        if (!context.mounted) return;
+        AppUpdateService.checkForUpdate(context);
+      });
     }
 
     final profileAsync = ref.watch(userProfileProvider);
