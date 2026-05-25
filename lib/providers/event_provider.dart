@@ -82,5 +82,21 @@ final eventsForDateProvider =
 final upcomingEventsProvider = Provider<List<HuntEvent>>((ref) {
   final events = ref.watch(eventsProvider).value ?? [];
   final now = DateTime.now();
-  return events.where((e) => e.date.isAfter(now.subtract(const Duration(days: 1)))).toList();
+  return events.where((e) => !_isEventEnded(e, now)).toList();
 });
+
+bool _isEventEnded(HuntEvent event, DateTime now) {
+  if (event.endTime != null) {
+    final parts = event.endTime!.split(':');
+    if (parts.length >= 2) {
+      final endDateTime = DateTime(
+        event.date.year, event.date.month, event.date.day,
+        int.tryParse(parts[0]) ?? 23,
+        int.tryParse(parts[1]) ?? 59,
+      );
+      return now.isAfter(endDateTime);
+    }
+  }
+  final endOfDay = DateTime(event.date.year, event.date.month, event.date.day, 23, 59);
+  return now.isAfter(endOfDay);
+}

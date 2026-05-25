@@ -91,10 +91,11 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 ),
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () => _confirmDelete(context),
-            ),
+            if (!_isEventPast(event))
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () => _confirmDelete(context),
+              ),
           ],
         ],
       ),
@@ -456,6 +457,12 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
         ],
       ),
     );
+  }
+
+  bool _isEventPast(HuntEvent event) {
+    final now = DateTime.now();
+    final lockTime = DateTime(event.date.year, event.date.month, event.date.day, 0, 1);
+    return now.isAfter(lockTime);
   }
 
   Future<void> _addComment() async {

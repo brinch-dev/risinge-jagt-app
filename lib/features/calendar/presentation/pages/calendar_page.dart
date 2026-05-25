@@ -12,7 +12,7 @@ import 'package:jagt_app/features/calendar/presentation/pages/event_detail_page.
 import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
 
 class CalendarPage extends ConsumerStatefulWidget {
-  const CalendarPage({Key? key}) : super(key: key);
+  const CalendarPage({super.key});
 
   @override
   ConsumerState<CalendarPage> createState() => _CalendarPageState();
@@ -129,10 +129,14 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
                     padding: const EdgeInsets.all(8),
                     itemBuilder: (context, index) {
                       final event = selectedEvents[index];
+                      final isPast = DateTime.now().isAfter(
+                        DateTime(event.date.year, event.date.month, event.date.day, 0, 1),
+                      );
                       return _EventCard(
                         event: event,
                         profile: profile,
-                        onDelete: profile != null &&
+                        onDelete: !isPast &&
+                                profile != null &&
                                 (profile.canEditAllEvents ||
                                     (profile.canEditOwnEvents &&
                                         event.createdBy == currentUserId))

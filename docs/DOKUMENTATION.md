@@ -1,6 +1,6 @@
 # Risinge Jagtvæsen — App Dokumentation
 
-**Version:** 2.5.11
+**Version:** 2.6.0
 **Opdateret:** 2026-05-23
 **Platforme:** Android (APK) + Web (Firebase Hosting)
 **Backend:** Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)
@@ -143,7 +143,7 @@ Roller styres dynamisk via `roles`-tabellen. Admin kan oprette, redigere og slet
 |---------|-------------|
 | Jagtområder | Opret og administrer områder med polygon-grænser |
 | Tårne/poster | Opret med navn, beskrivelse, type og billeder |
-| Brugere | Se alle brugere, ændr roller |
+| Brugere | Se alle brugere, ændr roller, slet brugere |
 | Chat kanaler | Opret/rediger/slet kanaler + rolle-adgang |
 | Broadcast | Send besked til alle |
 | Events | Opret/rediger med check-in/ud toggle |

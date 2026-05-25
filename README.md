@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.5.11
+# Risinge Jagtvæsen v2.6.0
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -113,7 +113,11 @@ firebase deploy --only hosting
 
 ## Versionshistorik
 
-### v2.5.11 (2026-05-25)
+### v2.6.0 (2026-05-25)
+- Events afsluttes ved sluttidspunkt (ikke midnat) — påvirker statistik og "kommende events"
+- Dags dato tælles ikke med i kommende events hvis event er afsluttet
+- Overståede events kan ikke slettes (låses kl. 00:01 på eventdatoen), men kan stadig redigeres
+- Admin kan slette brugere fra brugerstyring (med bekræftelsesdialog og admin log)
 - Fix: Dropdown til vildtart kan nu vælges korrekt (initialValue → value)
 
 ### v2.5.10 (2026-05-25)

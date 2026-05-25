@@ -301,6 +301,39 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
+## Session 14: 2026-05-25 — v2.6.0
+
+### Hvad blev lavet
+- **Vildtudbytte (Game Bag)**: ny feature til registrering af nedlagt vildt per event
+  - Dropdown med 45+ danske jagtbare/regulerbare vildtarter i 10 kategorier
+  - Vælg art → antal → tilføj til liste, plus samlet antal skud
+  - Foldbart kort-design med opsummering i header
+  - Database: `game_bag_entries` + `game_bag_totals` med RLS og realtime
+- **Events afsluttes ved sluttidspunkt**: `upcomingEventsProvider` bruger nu endTime til at afgøre om event er afsluttet
+- **Overståede events kan ikke slettes**: slet-knap skjules efter kl. 00:01 på eventdatoen (redigering stadig mulig)
+- **Admin kan slette brugere**: slet-knap i brugerstyring med bekræftelsesdialog og admin log
+
+### Bugs fundet og løst
+- **Widget reorder fix (2. forsøg)**: omskrevet til `reorderByIndex` med direkte index-manipulation
+- **Vildtart dropdown virkede ikke**: `initialValue` reagerer ikke på `setState`, skiftet til `value`
+- **Kommende events talte dags dato med**: `upcomingEventsProvider` brugte `subtract(Duration(days: 1))` som inkluderede afsluttede events
+
+### Filer ændret
+- `lib/providers/event_provider.dart` — `upcomingEventsProvider` + `_isEventEnded()` med endTime-logik
+- `lib/features/calendar/presentation/pages/event_detail_page.dart` — vildtudbytte-sektion, slet-lås, `_isEventPast()`
+- `lib/features/calendar/presentation/pages/calendar_page.dart` — slet-lås for overståede events
+- `lib/features/admin/presentation/pages/manage_users_page.dart` — slet bruger med bekræftelse
+- `lib/providers/homepage_provider.dart` — `reorderByIndex()` metode
+- `lib/features/admin/presentation/pages/manage_homepage_page.dart` — onReorder bruger `reorderByIndex`
+
+### Filer oprettet
+- `lib/constants/game_species.dart` — danske vildtarter i kategorier
+- `lib/models/game_bag_entry.dart` — model
+- `lib/providers/game_bag_provider.dart` — provider med realtime
+- `sql/game_bag.sql` — database migration
+
+---
+
 ## Kendte begrænsninger og fremtidige opgaver
 
 ### Begrænsninger

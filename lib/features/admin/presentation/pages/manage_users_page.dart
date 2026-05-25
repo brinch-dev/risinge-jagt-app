@@ -14,7 +14,7 @@ final allUsersProvider = FutureProvider<List<UserProfile>>((ref) async {
 });
 
 class ManageUsersPage extends ConsumerWidget {
-  const ManageUsersPage({Key? key}) : super(key: key);
+  const ManageUsersPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,10 +50,20 @@ class ManageUsersPage extends ConsumerWidget {
                       : user.displayName),
                   subtitle: Text('${user.email}\n${user.role.label}'),
                   isThreeLine: true,
-                  trailing: _RoleMenuButton(
-                    user: user,
-                    currentUserId: currentUserId,
-                    ref: ref,
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _RoleMenuButton(
+                        user: user,
+                        currentUserId: currentUserId,
+                        ref: ref,
+                      ),
+                      if (user.id != currentUserId)
+                        IconButton(
+                          icon: Icon(Icons.delete_outline, color: Colors.red.shade300, size: 20),
+                          onPressed: () => _confirmDeleteUser(context, ref, user),
+                        ),
+                    ],
                   ),
                 ),
               );
@@ -66,6 +76,37 @@ class ManageUsersPage extends ConsumerWidget {
 
   Color _roleColor(UserRole role) {
     return _roleColorFromId(role.dbValue);
+  }
+
+  void _confirmDeleteUser(BuildContext context, WidgetRef ref, UserProfile user) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Slet bruger'),
+        content: Text('Er du sikker på at du vil slette "${user.displayName.isEmpty ? user.email : user.displayName}"?\n\nDette sletter brugerens profil. Brugeren vil ikke længere kunne logge ind.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuller'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final client = ref.read(supabaseProvider);
+              await client.from('profiles').delete().eq('id', user.id);
+              await writeAdminLog(ref,
+                  type: 'user_delete',
+                  message: '${user.displayName.isEmpty ? user.email : user.displayName} slettet',
+                  userId: user.id,
+                  userName: user.displayName.isEmpty ? user.email : user.displayName);
+              ref.invalidate(allUsersProvider);
+            },
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Slet'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
