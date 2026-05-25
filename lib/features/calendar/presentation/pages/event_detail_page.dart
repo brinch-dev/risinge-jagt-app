@@ -40,7 +40,7 @@ final _eventWeatherFamily =
 
 class EventDetailPage extends ConsumerStatefulWidget {
   final HuntEvent event;
-  const EventDetailPage({Key? key, required this.event}) : super(key: key);
+  const EventDetailPage({super.key, required this.event});
 
   @override
   ConsumerState<EventDetailPage> createState() => _EventDetailPageState();
@@ -341,7 +341,6 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
         final tempMin =
             ((daily['temperature_2m_min'] as List).first as num).round();
 
-        final cs = Theme.of(context).colorScheme;
         return Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Card(
@@ -449,7 +448,7 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
             onPressed: () async {
               Navigator.pop(ctx);
               await ref.read(eventsProvider.notifier).deleteEvent(widget.event.id);
-              if (mounted) Navigator.pop(context);
+              if (context.mounted) Navigator.pop(context);
             },
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Slet'),
