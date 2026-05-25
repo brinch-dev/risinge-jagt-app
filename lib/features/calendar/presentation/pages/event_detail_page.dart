@@ -492,6 +492,7 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
   final _countCtrl = TextEditingController();
   final _shotsCtrl = TextEditingController();
   bool _shotsInitialized = false;
+  bool _isExpanded = false;
 
   @override
   void dispose() {
@@ -505,193 +506,312 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
     final cs = Theme.of(context).colorScheme;
     final gameBagAsync = ref.watch(gameBagProviderFamily(widget.eventId));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.pets, size: 20, color: cs.primary),
-            const SizedBox(width: 8),
-            Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _buildAddEntryRow(context, cs, gameBagAsync),
-        const SizedBox(height: 8),
-        gameBagAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text('Fejl: $e'),
-          data: (gameBag) {
-            if (!_shotsInitialized && gameBag.totalShots != null) {
-              _shotsCtrl.text = gameBag.totalShots.toString();
-              _shotsInitialized = true;
-            }
-            return Column(
-              children: [
-                if (gameBag.entries.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text('Ingen vildt registreret endnu',
-                        style: TextStyle(color: cs.outline)),
-                  )
-                else ...[
-                  Card(
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          // Header
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer.withValues(alpha: 0.4),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cs.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.pets, size: 20, color: cs.primary),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        for (int i = 0; i < gameBag.entries.length; i++) ...[
-                          ListTile(
-                            dense: true,
-                            leading: Icon(Icons.circle, size: 8, color: cs.primary),
-                            title: Text(gameBag.entries[i].species),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '${gameBag.entries[i].count}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: cs.onSurface,
-                                  ),
+                        Text('Nedlagt vildt',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: cs.onSurface,
+                            )),
+                        gameBagAsync.whenOrNull(
+                              data: (gb) => gb.entries.isNotEmpty
+                                  ? Text(
+                                      '${gb.entries.length} arter — ${gb.entries.fold<int>(0, (s, e) => s + e.count)} stk.',
+                                      style: TextStyle(fontSize: 12, color: cs.outline),
+                                    )
+                                  : Text('Tryk for at registrere',
+                                      style: TextStyle(fontSize: 12, color: cs.outline)),
+                            ) ??
+                            const SizedBox.shrink(),
+                      ],
+                    ),
+                  ),
+                  gameBagAsync.whenOrNull(
+                        data: (gb) => gb.totalShots != null
+                            ? Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: cs.secondaryContainer,
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                                const SizedBox(width: 4),
-                                IconButton(
-                                  icon: Icon(Icons.delete_outline, size: 18, color: cs.error),
-                                  onPressed: () => ref
-                                      .read(gameBagProviderFamily(widget.eventId).notifier)
-                                      .deleteEntry(gameBag.entries[i].id),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.gps_fixed, size: 13, color: cs.onSecondaryContainer),
+                                    const SizedBox(width: 4),
+                                    Text('${gb.totalShots}',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: cs.onSecondaryContainer,
+                                        )),
+                                  ],
+                                ),
+                              )
+                            : null,
+                      ) ??
+                      const SizedBox.shrink(),
+                  const SizedBox(width: 4),
+                  AnimatedRotation(
+                    turns: _isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Icon(Icons.expand_more, color: cs.outline),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Entries list (always visible if not empty)
+          gameBagAsync.when(
+            loading: () => const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, _) => Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Fejl: $e'),
+            ),
+            data: (gameBag) {
+              if (!_shotsInitialized && gameBag.totalShots != null) {
+                _shotsCtrl.text = gameBag.totalShots.toString();
+                _shotsInitialized = true;
+              }
+              return Column(
+                children: [
+                  if (gameBag.entries.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Column(
+                        children: [
+                          for (int i = 0; i < gameBag.entries.length; i++) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: cs.primaryContainer.withValues(alpha: 0.5),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${gameBag.entries[i].count}',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: cs.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      gameBag.entries[i].species,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: cs.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 32,
+                                    height: 32,
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(Icons.close, size: 16, color: cs.outline),
+                                      onPressed: () => ref
+                                          .read(gameBagProviderFamily(widget.eventId).notifier)
+                                          .deleteEntry(gameBag.entries[i].id),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (i < gameBag.entries.length - 1)
+                              Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
+                          ],
+                        ],
+                      ),
+                    ),
+
+                  // Summary bar
+                  if (gameBag.entries.isNotEmpty)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total vildt',
+                            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+                          ),
+                          Text(
+                            '${gameBag.entries.fold<int>(0, (sum, e) => sum + e.count)} stk.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  // Expandable add section
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    child: _isExpanded
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                DropdownButtonFormField<String>(
+                                  initialValue: _selectedSpecies,
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: 'Vildtart',
+                                    prefixIcon: Icon(Icons.search, size: 18, color: cs.outline),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  ),
+                                  items: gameSpeciesCategories.expand((cat) {
+                                    return [
+                                      DropdownMenuItem<String>(
+                                        enabled: false,
+                                        child: Text(
+                                          cat.name.toUpperCase(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            color: cs.primary,
+                                            fontSize: 11,
+                                            letterSpacing: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      ...cat.species.map((s) => DropdownMenuItem<String>(
+                                            value: s,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(left: 8),
+                                              child: Text(s, style: const TextStyle(fontSize: 14)),
+                                            ),
+                                          )),
+                                    ];
+                                  }).toList(),
+                                  onChanged: (val) => setState(() => _selectedSpecies = val),
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _countCtrl,
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          labelText: 'Antal',
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    FilledButton.icon(
+                                      onPressed: _addEntry,
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: const Text('Tilføj'),
+                                      style: FilledButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Divider(color: cs.outlineVariant.withValues(alpha: 0.4)),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _shotsCtrl,
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                          labelText: 'Samlet antal skud',
+                                          prefixIcon: Icon(Icons.gps_fixed, size: 18, color: cs.outline),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    FilledButton.tonalIcon(
+                                      onPressed: _saveTotalShots,
+                                      icon: const Icon(Icons.save_outlined, size: 18),
+                                      label: const Text('Gem'),
+                                      style: FilledButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ),
-                          if (i < gameBag.entries.length - 1)
-                            Divider(height: 1, indent: 16, endIndent: 16, color: cs.outlineVariant),
-                        ],
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4, right: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Samlet vildt: ${gameBag.entries.fold<int>(0, (sum, e) => sum + e.count)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
+                          )
+                        : const SizedBox.shrink(),
                   ),
                 ],
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _shotsCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Samlet antal skud',
-                          prefixIcon: Icon(Icons.gps_fixed, size: 18, color: cs.outline),
-                          border: const OutlineInputBorder(),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilledButton(
-                      onPressed: _saveTotalShots,
-                      child: const Text('Gem'),
-                    ),
-                  ],
-                ),
-                if (gameBag.totalShots != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      'Registreret: ${gameBag.totalShots} skud',
-                      style: TextStyle(fontSize: 12, color: cs.outline),
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAddEntryRow(BuildContext context, ColorScheme cs, AsyncValue<GameBagState> gameBagAsync) {
-    final existingSpecies = gameBagAsync.value?.entries.map((e) => e.species).toSet() ?? {};
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          flex: 3,
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedSpecies,
-            isExpanded: true,
-            decoration: const InputDecoration(
-              labelText: 'Vildtart',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-            items: gameSpeciesCategories.expand((cat) {
-              return [
-                DropdownMenuItem<String>(
-                  enabled: false,
-                  child: Text(
-                    cat.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: cs.primary,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                ...cat.species.map((s) => DropdownMenuItem<String>(
-                      value: s,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 8),
-                        child: Text(
-                          s,
-                          style: TextStyle(
-                            color: existingSpecies.contains(s) ? cs.outline : null,
-                          ),
-                        ),
-                      ),
-                    )),
-              ];
-            }).toList(),
-            onChanged: (val) => setState(() => _selectedSpecies = val),
+              );
+            },
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          flex: 1,
-          child: TextField(
-            controller: _countCtrl,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Antal',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: IconButton.filled(
-            onPressed: _addEntry,
-            icon: const Icon(Icons.add),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
