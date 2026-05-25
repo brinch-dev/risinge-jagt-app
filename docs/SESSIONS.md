@@ -274,6 +274,11 @@ Kronologisk oversigt over alle udviklingssessioner.
 - `supabase/functions/send-push/index.ts` — generelle kanaler håndteret korrekt
 - `lib/services/push_notification_service.dart` — debug-logging (tilføjet og fjernet)
 
+### v2.5.8: Widget-reorder fix
+- `reorder()` i `homepage_provider.dart` opdaterede kun den flyttede bloks `sort_order` → to blokke fik samme sort_order og rækkefølgen blev udefineret
+- Fixet: alle blokkes `sort_order` opdateres sekventielt (0, 1, 2, ...) efter flytning
+- Early return tilføjet i UI hvis `oldIndex == newIndex`
+
 ---
 
 ## Kendte begrænsninger og fremtidige opgaver

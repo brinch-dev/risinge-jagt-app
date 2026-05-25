@@ -64,6 +64,7 @@ class ManageHomepagePage extends ConsumerWidget {
             padding: const EdgeInsets.all(8),
             onReorder: (oldIndex, newIndex) async {
               if (newIndex > oldIndex) newIndex--;
+              if (oldIndex == newIndex) return;
               final block = blocks[oldIndex];
               final targetOrder = blocks[newIndex].sortOrder;
               await ref
