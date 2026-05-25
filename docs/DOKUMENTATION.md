@@ -1,6 +1,6 @@
 # Risinge Jagtvæsen — App Dokumentation
 
-**Version:** 2.5.8
+**Version:** 2.5.9
 **Opdateret:** 2026-05-23
 **Platforme:** Android (APK) + Web (Firebase Hosting)
 **Backend:** Supabase (PostgreSQL, Auth, Realtime, Storage, Edge Functions)
@@ -108,6 +108,7 @@ Roller styres dynamisk via `roles`-tabellen. Admin kan oprette, redigere og slet
 - Event-kort med titel, beskrivelse, tid, område
 - Tilmeld/Afmeld knapper med deltagerantal
 - Poster-knap til tårn-reservation
+- Vildtudbytte: registrer nedlagt vildt per event med kategoriseret artsliste, antal og samlet skud
 
 ### Chat
 - Kanal-baseret med realtime (Supabase Realtime + 3s polling fallback)
@@ -173,6 +174,8 @@ Roller styres dynamisk via `roles`-tabellen. Admin kan oprette, redigere og slet
 | `chat_channels` | Chatkanaler (general/private/group + required_roles) |
 | `channel_members` | Kanal-medlemskaber |
 | `chat_messages` | Chatbeskeder (tekst, billede, video) |
+| `game_bag_entries` | Vildtudbytte per event (art + antal) |
+| `game_bag_totals` | Samlet antal skud per event |
 | `homepage_blocks` | Forsideblokke (hero, welcome, text, etc.) |
 | `app_notifications` | In-app notifikationer |
 | `notification_reads` | Læst-status |

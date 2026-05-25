@@ -95,22 +95,19 @@ class HomeBlocksNotifier extends AsyncNotifier<List<HomeBlock>> {
     ref.invalidateSelf();
   }
 
-  Future<void> reorder(String blockId, int targetOrder) async {
+  Future<void> reorderByIndex(int oldIndex, int newIndex) async {
     final blocks = List<HomeBlock>.from(state.value ?? []);
-    final oldIndex = blocks.indexWhere((b) => b.id == blockId);
-    if (oldIndex == -1) return;
+    if (oldIndex < 0 || oldIndex >= blocks.length) return;
+    if (newIndex < 0 || newIndex >= blocks.length) return;
 
     final block = blocks.removeAt(oldIndex);
-    final newIndex = blocks.indexWhere((b) => b.sortOrder == targetOrder);
-    blocks.insert(newIndex == -1 ? blocks.length : newIndex, block);
+    blocks.insert(newIndex, block);
 
     final client = ref.read(supabaseProvider);
     for (int i = 0; i < blocks.length; i++) {
-      if (blocks[i].sortOrder != i) {
-        await client
-            .from('homepage_blocks')
-            .update({'sort_order': i}).eq('id', blocks[i].id);
-      }
+      await client
+          .from('homepage_blocks')
+          .update({'sort_order': i}).eq('id', blocks[i].id);
     }
     ref.invalidateSelf();
   }

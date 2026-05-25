@@ -65,11 +65,9 @@ class ManageHomepagePage extends ConsumerWidget {
             onReorder: (oldIndex, newIndex) async {
               if (newIndex > oldIndex) newIndex--;
               if (oldIndex == newIndex) return;
-              final block = blocks[oldIndex];
-              final targetOrder = blocks[newIndex].sortOrder;
               await ref
                   .read(homeBlocksProvider.notifier)
-                  .reorder(block.id, targetOrder);
+                  .reorderByIndex(oldIndex, newIndex);
             },
             itemBuilder: (context, index) {
               final block = blocks[index];

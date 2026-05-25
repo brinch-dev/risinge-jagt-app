@@ -16,6 +16,8 @@ import 'package:jagt_app/providers/map_provider.dart';
 import 'package:jagt_app/features/towers/presentation/pages/tower_reservation_page.dart';
 import 'package:jagt_app/features/admin/presentation/pages/edit_event_page.dart';
 import 'package:jagt_app/providers/event_provider.dart';
+import 'package:jagt_app/providers/game_bag_provider.dart';
+import 'package:jagt_app/constants/game_species.dart';
 
 final _eventWeatherFamily =
     FutureProvider.family<Map<String, dynamic>?, ({DateTime date, double lat, double lng})>(
@@ -235,6 +237,8 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
             },
           ),
 
+          const SizedBox(height: 24),
+          _GameBagSection(eventId: event.id),
           const SizedBox(height: 24),
           Text('Noter', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -471,6 +475,263 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
       }
     } finally {
       if (mounted) setState(() => _sending = false);
+    }
+  }
+}
+
+class _GameBagSection extends ConsumerStatefulWidget {
+  final String eventId;
+  const _GameBagSection({required this.eventId});
+
+  @override
+  ConsumerState<_GameBagSection> createState() => _GameBagSectionState();
+}
+
+class _GameBagSectionState extends ConsumerState<_GameBagSection> {
+  String? _selectedSpecies;
+  final _countCtrl = TextEditingController();
+  final _shotsCtrl = TextEditingController();
+  bool _shotsInitialized = false;
+
+  @override
+  void dispose() {
+    _countCtrl.dispose();
+    _shotsCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final gameBagAsync = ref.watch(gameBagProviderFamily(widget.eventId));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.pets, size: 20, color: cs.primary),
+            const SizedBox(width: 8),
+            Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildAddEntryRow(context, cs, gameBagAsync),
+        const SizedBox(height: 8),
+        gameBagAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Text('Fejl: $e'),
+          data: (gameBag) {
+            if (!_shotsInitialized && gameBag.totalShots != null) {
+              _shotsCtrl.text = gameBag.totalShots.toString();
+              _shotsInitialized = true;
+            }
+            return Column(
+              children: [
+                if (gameBag.entries.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text('Ingen vildt registreret endnu',
+                        style: TextStyle(color: cs.outline)),
+                  )
+                else ...[
+                  Card(
+                    child: Column(
+                      children: [
+                        for (int i = 0; i < gameBag.entries.length; i++) ...[
+                          ListTile(
+                            dense: true,
+                            leading: Icon(Icons.circle, size: 8, color: cs.primary),
+                            title: Text(gameBag.entries[i].species),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '${gameBag.entries[i].count}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  icon: Icon(Icons.delete_outline, size: 18, color: cs.error),
+                                  onPressed: () => ref
+                                      .read(gameBagProviderFamily(widget.eventId).notifier)
+                                      .deleteEntry(gameBag.entries[i].id),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (i < gameBag.entries.length - 1)
+                            Divider(height: 1, indent: 16, endIndent: 16, color: cs.outlineVariant),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4, right: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Samlet vildt: ${gameBag.entries.fold<int>(0, (sum, e) => sum + e.count)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _shotsCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Samlet antal skud',
+                          prefixIcon: Icon(Icons.gps_fixed, size: 18, color: cs.outline),
+                          border: const OutlineInputBorder(),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: _saveTotalShots,
+                      child: const Text('Gem'),
+                    ),
+                  ],
+                ),
+                if (gameBag.totalShots != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      'Registreret: ${gameBag.totalShots} skud',
+                      style: TextStyle(fontSize: 12, color: cs.outline),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAddEntryRow(BuildContext context, ColorScheme cs, AsyncValue<GameBagState> gameBagAsync) {
+    final existingSpecies = gameBagAsync.value?.entries.map((e) => e.species).toSet() ?? {};
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 3,
+          child: DropdownButtonFormField<String>(
+            initialValue: _selectedSpecies,
+            isExpanded: true,
+            decoration: const InputDecoration(
+              labelText: 'Vildtart',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+            items: gameSpeciesCategories.expand((cat) {
+              return [
+                DropdownMenuItem<String>(
+                  enabled: false,
+                  child: Text(
+                    cat.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: cs.primary,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                ...cat.species.map((s) => DropdownMenuItem<String>(
+                      value: s,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: Text(
+                          s,
+                          style: TextStyle(
+                            color: existingSpecies.contains(s) ? cs.outline : null,
+                          ),
+                        ),
+                      ),
+                    )),
+              ];
+            }).toList(),
+            onChanged: (val) => setState(() => _selectedSpecies = val),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 1,
+          child: TextField(
+            controller: _countCtrl,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Antal',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: IconButton.filled(
+            onPressed: _addEntry,
+            icon: const Icon(Icons.add),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _addEntry() async {
+    if (_selectedSpecies == null) return;
+    final count = int.tryParse(_countCtrl.text.trim());
+    if (count == null || count <= 0) return;
+
+    try {
+      await ref
+          .read(gameBagProviderFamily(widget.eventId).notifier)
+          .addOrUpdateEntry(_selectedSpecies!, count);
+      _countCtrl.clear();
+      setState(() => _selectedSpecies = null);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fejl: $e')));
+      }
+    }
+  }
+
+  Future<void> _saveTotalShots() async {
+    final shots = int.tryParse(_shotsCtrl.text.trim());
+    if (shots == null || shots < 0) return;
+
+    try {
+      await ref
+          .read(gameBagProviderFamily(widget.eventId).notifier)
+          .setTotalShots(shots);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Antal skud gemt')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fejl: $e')));
+      }
     }
   }
 }

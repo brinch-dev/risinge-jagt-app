@@ -274,10 +274,30 @@ Kronologisk oversigt over alle udviklingssessioner.
 - `supabase/functions/send-push/index.ts` — generelle kanaler håndteret korrekt
 - `lib/services/push_notification_service.dart` — debug-logging (tilføjet og fjernet)
 
-### v2.5.8: Widget-reorder fix
-- `reorder()` i `homepage_provider.dart` opdaterede kun den flyttede bloks `sort_order` → to blokke fik samme sort_order og rækkefølgen blev udefineret
-- Fixet: alle blokkes `sort_order` opdateres sekventielt (0, 1, 2, ...) efter flytning
-- Early return tilføjet i UI hvis `oldIndex == newIndex`
+### v2.5.8: Widget-reorder fix (2. forsøg)
+- Første fix virkede ikke (brugte `indexWhere` med sort_order som allerede var duplikeret)
+- Omskrevet til `reorderByIndex(oldIndex, newIndex)` med direkte index-manipulation
+- Alle blokkes `sort_order` opdateres sekventielt (0, 1, 2, ...) efter flytning
+- UI kalder nu `reorderByIndex` med `newIndex > oldIndex ? newIndex-- : newIndex`
+
+### v2.5.9: Vildtudbytte (Game Bag)
+- Ny feature: registrer nedlagt vildt per event
+- Dropdown med kategoriserede danske jagtbare og regulerbare vildtarter (10 kategorier, 45+ arter)
+- Kategorier: Hjortevildt, Vildsvin, Småvildt, Ænder, Gæs, Hønsefugle, Duer, Vadefugle, Øvrige fugle, Regulering
+- Vælg art → indtast antal → tilføj til liste
+- Samlet antal skud per event (separat felt)
+- Database: `game_bag_entries` (art + antal per event) + `game_bag_totals` (skud per event)
+- RLS: alle authenticated kan læse, non-guest kan skrive
+- Realtime via Supabase Realtime
+
+### Filer oprettet
+- `lib/constants/game_species.dart` — danske vildtarter i kategorier
+- `lib/models/game_bag_entry.dart` — model
+- `lib/providers/game_bag_provider.dart` — provider med realtime
+- `sql/game_bag.sql` — database migration
+
+### Filer ændret
+- `lib/features/calendar/presentation/pages/event_detail_page.dart` — vildtudbytte-sektion tilføjet
 
 ---
 
