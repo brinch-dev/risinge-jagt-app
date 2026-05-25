@@ -17,18 +17,26 @@ Deno.serve(async (req) => {
 
       const [senderRes, channelRes, membersRes] = await Promise.all([
         supabaseQuery(supabaseUrl, supabaseKey, "profiles", `id=eq.${sender_id}&select=display_name`),
-        supabaseQuery(supabaseUrl, supabaseKey, "chat_channels", `id=eq.${channel_id}&select=name`),
+        supabaseQuery(supabaseUrl, supabaseKey, "chat_channels", `id=eq.${channel_id}&select=name,type`),
         supabaseQuery(supabaseUrl, supabaseKey, "channel_members", `channel_id=eq.${channel_id}&user_id=neq.${sender_id}&select=user_id`),
       ]);
 
       const senderName = senderRes[0]?.display_name || "Ukendt";
       const channelName = channelRes[0]?.name || "Chat";
+      const channelType = channelRes[0]?.type || "general";
 
-      if (membersRes.length > 0) {
+      if (channelType === "general") {
+        const tokenRows = await supabaseQuery(supabaseUrl, supabaseKey, "fcm_tokens", `user_id=neq.${sender_id}&select=token`);
+        if (Array.isArray(tokenRows)) {
+          tokens = tokenRows.map((t: { token: string }) => t.token);
+        }
+      } else if (membersRes.length > 0) {
         const userIds = membersRes.map((m: { user_id: string }) => m.user_id);
         const tokenQuery = `user_id=in.(${userIds.join(",")})&select=token`;
         const tokenRows = await supabaseQuery(supabaseUrl, supabaseKey, "fcm_tokens", tokenQuery);
-        tokens = tokenRows.map((t: { token: string }) => t.token);
+        if (Array.isArray(tokenRows)) {
+          tokens = tokenRows.map((t: { token: string }) => t.token);
+        }
       }
 
       title = channelName;
@@ -41,7 +49,9 @@ Deno.serve(async (req) => {
       let query = "select=token,user_id";
       if (sender_id) query += `&user_id=neq.${sender_id}`;
       const tokenRows = await supabaseQuery(supabaseUrl, supabaseKey, "fcm_tokens", query);
-      tokens = tokenRows.map((t: { token: string }) => t.token);
+      if (Array.isArray(tokenRows)) {
+        tokens = tokenRows.map((t: { token: string }) => t.token);
+      }
 
       title = t || "Meddelelse";
       body = message || "";
@@ -53,7 +63,9 @@ Deno.serve(async (req) => {
       let query = "select=token,user_id";
       if (exclude_user_id) query += `&user_id=neq.${exclude_user_id}`;
       const tokenRows = await supabaseQuery(supabaseUrl, supabaseKey, "fcm_tokens", query);
-      tokens = tokenRows.map((t: { token: string }) => t.token);
+      if (Array.isArray(tokenRows)) {
+        tokens = tokenRows.map((t: { token: string }) => t.token);
+      }
 
       title = t || "Begivenhed";
       body = message || "";

@@ -256,6 +256,26 @@ Kronologisk oversigt over alle udviklingssessioner.
 
 ---
 
+## Session 13: 2026-05-25 — v2.5.7
+
+### Hvad blev lavet
+- **Push notification fix for generelle kanaler**: Edge Function `send-push` opdateret
+- Generelle kanaler kiggede kun i `channel_members` (som kun bruges til private kanaler) → ingen push
+- Nu tjekker Edge Function kanal-typen: generelle kanaler sender push til alle FCM tokens (undtagen afsender)
+- Private/gruppe kanaler sender stadig kun til channel members
+- `Array.isArray` guard tilføjet på alle `tokenRows` for at undgå crashes ved uventede API-svar
+- Debug-logging tilføjet og fjernet igen i `push_notification_service.dart` under fejlsøgning
+
+### Bugs fundet og løst
+- **Push notifications virkede ikke for generelle chatkanaler**: `channel_members` tabellen bruges ikke for generelle kanaler, så Edge Function fandt aldrig nogen modtagere. Fixet ved at tjekke `channelRes[0].type` og sende til alle tokens for generelle kanaler.
+- **Broadcast Edge Function crash**: `tokenRows.map is not a function` — Supabase REST API returnerede et error-objekt i stedet for array. Fixet med `Array.isArray` guard.
+
+### Filer ændret
+- `supabase/functions/send-push/index.ts` — generelle kanaler håndteret korrekt
+- `lib/services/push_notification_service.dart` — debug-logging (tilføjet og fjernet)
+
+---
+
 ## Kendte begrænsninger og fremtidige opgaver
 
 ### Begrænsninger
