@@ -702,7 +702,8 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 DropdownButtonFormField<String>(
-                                  initialValue: _selectedSpecies,
+                                  // ignore: deprecated_member_use
+                                  value: _selectedSpecies,
                                   isExpanded: true,
                                   decoration: InputDecoration(
                                     labelText: 'Vildtart',

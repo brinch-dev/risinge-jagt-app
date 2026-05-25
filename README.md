@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.5.10
+# Risinge Jagtvæsen v2.5.11
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -112,6 +112,9 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.5.11 (2026-05-25)
+- Fix: Dropdown til vildtart kan nu vælges korrekt (initialValue → value)
 
 ### v2.5.10 (2026-05-25)
 - Vildtudbytte UI redesign: foldbart kort med opsummering i header, animeret expand/collapse
