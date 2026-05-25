@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.6.0
+# Risinge Jagtvæsen v2.6.1
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -112,6 +112,11 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.6.1 (2026-05-25)
+- Fix: Vildtudbytte dropdown, antal og skud virker nu korrekt (input-felter flyttet ud af async builder)
+- Feedback ved manglende valg/antal
+- Dropdown nulstilles korrekt efter tilføjelse
 
 ### v2.6.0 (2026-05-25)
 - Events afsluttes ved sluttidspunkt (ikke midnat) — påvirker statistik og "kommende events"
