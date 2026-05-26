@@ -297,8 +297,10 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       ),
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (_) => _sendMessage(),
+                      textCapitalization: TextCapitalization.sentences,
+                      textInputAction: TextInputAction.newline,
+                      maxLines: 5,
+                      minLines: 1,
                     ),
                   ),
                   IconButton(

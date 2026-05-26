@@ -308,12 +308,14 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 Expanded(
                   child: TextField(
                     controller: _commentCtrl,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.newline,
                     decoration: const InputDecoration(
                       hintText: 'Skriv en note...',
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
-                    maxLines: 2,
+                    maxLines: 5,
                     minLines: 1,
                   ),
                 ),
@@ -818,6 +820,37 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                                         ),
                                       ],
                                     ),
+                                    const SizedBox(height: 16),
+                                    Divider(color: cs.outlineVariant.withValues(alpha: 0.4)),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: TextField(
+                                            controller: _shotsCtrl,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                              labelText: 'Samlet antal skud afgivet',
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        FilledButton.tonal(
+                                          onPressed: _saveTotalShots,
+                                          style: FilledButton.styleFrom(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                          ),
+                                          child: const Text('Gem'),
+                                        ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               )
@@ -831,35 +864,45 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
           ),
         ),
 
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _shotsCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Samlet antal skud',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+        gameBagAsync.whenOrNull(
+          data: (gb) {
+            final totalGame = gb.entries.fold<int>(0, (sum, e) => sum + e.count);
+            if (totalGame == 0 && gb.totalShots == null) return null;
+            return Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _statCol(cs, '$totalGame', 'Nedlagt'),
+                      if (gb.totalShots != null)
+                        _statCol(cs, '${gb.totalShots}', 'Skud afgivet'),
+                    ],
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                 ),
               ),
-            ),
-            const SizedBox(width: 10),
-            FilledButton.tonal(
-              onPressed: _saveTotalShots,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text('Gem'),
-            ),
-          ],
-        ),
+            );
+          },
+        ) ?? const SizedBox.shrink(),
+      ],
+    );
+  }
+
+  Widget _statCol(ColorScheme cs, String value, String label) {
+    return Column(
+      children: [
+        Text(value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: cs.primary,
+            )),
+        const SizedBox(height: 2),
+        Text(label,
+            style: TextStyle(fontSize: 11, color: cs.outline)),
       ],
     );
   }
