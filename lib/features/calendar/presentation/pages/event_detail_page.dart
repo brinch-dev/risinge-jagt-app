@@ -822,7 +822,14 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                                     ),
                                     const SizedBox(height: 16),
                                     Divider(color: cs.outlineVariant.withValues(alpha: 0.4)),
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: 8),
+                                    Text('Skud afgivet',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: cs.onSurfaceVariant,
+                                        )),
+                                    const SizedBox(height: 8),
                                     Row(
                                       children: [
                                         Expanded(
@@ -830,9 +837,12 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                                             controller: _shotsCtrl,
                                             keyboardType: TextInputType.number,
                                             decoration: InputDecoration(
-                                              labelText: 'Samlet antal skud afgivet',
+                                              hintText: 'Antal skud',
+                                              filled: true,
+                                              fillColor: cs.surfaceContainerLow,
                                               border: OutlineInputBorder(
                                                 borderRadius: BorderRadius.circular(12),
+                                                borderSide: BorderSide.none,
                                               ),
                                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                                             ),
