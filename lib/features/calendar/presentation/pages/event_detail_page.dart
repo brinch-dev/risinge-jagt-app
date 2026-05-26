@@ -517,9 +517,11 @@ class _GameBagSection extends ConsumerStatefulWidget {
 
 class _GameBagSectionState extends ConsumerState<_GameBagSection> {
 
-  void _addGameEntry() {
+  Future<void> _addGameEntry() async {
     final cs = Theme.of(context).colorScheme;
-    showModalBottomSheet(
+
+    // Step 1: Pick species — bottom sheet returns the name
+    final species = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -554,10 +556,7 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                   ...cat.species.map((s) => ListTile(
                         title: Text(s),
                         dense: true,
-                        onTap: () {
-                          Navigator.pop(ctx);
-                          _askCount(s);
-                        },
+                        onTap: () => Navigator.pop(ctx, s),
                       )),
                 ]).toList(),
               ),
@@ -566,16 +565,17 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         ),
       ),
     );
-  }
 
-  Future<void> _askCount(String species) async {
-    final controller = TextEditingController();
-    final result = await showDialog<int>(
+    if (species == null || !mounted) return;
+
+    // Step 2: Ask count — dialog returns the number
+    final countCtrl = TextEditingController();
+    final count = await showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(species),
         content: TextField(
-          controller: controller,
+          controller: countCtrl,
           keyboardType: TextInputType.number,
           autofocus: true,
           decoration: const InputDecoration(labelText: 'Antal nedlagt'),
@@ -584,7 +584,7 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuller')),
           FilledButton(
             onPressed: () {
-              final val = int.tryParse(controller.text.trim());
+              final val = int.tryParse(countCtrl.text.trim());
               if (val != null && val > 0) Navigator.pop(ctx, val);
             },
             child: const Text('Tilføj'),
@@ -592,15 +592,24 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         ],
       ),
     );
-    controller.dispose();
-    if (result != null) {
+    countCtrl.dispose();
+
+    if (count == null || !mounted) return;
+
+    // Step 3: Save
+    try {
       await ref
           .read(gameBagProviderFamily(widget.eventId).notifier)
-          .addOrUpdateEntry(species, result);
+          .addOrUpdateEntry(species, count);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fejl: $e')));
+      }
     }
   }
 
   Future<void> _addShots() async {
+    if (!mounted) return;
     final controller = TextEditingController();
     final result = await showDialog<int>(
       context: context,
@@ -625,10 +634,17 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
       ),
     );
     controller.dispose();
-    if (result != null) {
+
+    if (result == null || !mounted) return;
+
+    try {
       await ref
           .read(gameBagProviderFamily(widget.eventId).notifier)
           .addShots(result);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fejl: $e')));
+      }
     }
   }
 
