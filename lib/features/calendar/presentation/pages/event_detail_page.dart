@@ -516,18 +516,8 @@ class _GameBagSection extends ConsumerStatefulWidget {
 }
 
 class _GameBagSectionState extends ConsumerState<_GameBagSection> {
-  String? _selectedSpecies;
-  final _countCtrl = TextEditingController();
-  final _shotsCtrl = TextEditingController();
 
-  @override
-  void dispose() {
-    _countCtrl.dispose();
-    _shotsCtrl.dispose();
-    super.dispose();
-  }
-
-  void _pickSpecies() {
+  void _addGameEntry() {
     final cs = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
@@ -566,7 +556,7 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                         dense: true,
                         onTap: () {
                           Navigator.pop(ctx);
-                          setState(() => _selectedSpecies = s);
+                          _askCount(s);
                         },
                       )),
                 ]).toList(),
@@ -578,6 +568,70 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
     );
   }
 
+  Future<void> _askCount(String species) async {
+    final controller = TextEditingController();
+    final result = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(species),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Antal nedlagt'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuller')),
+          FilledButton(
+            onPressed: () {
+              final val = int.tryParse(controller.text.trim());
+              if (val != null && val > 0) Navigator.pop(ctx, val);
+            },
+            child: const Text('Tilføj'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (result != null) {
+      await ref
+          .read(gameBagProviderFamily(widget.eventId).notifier)
+          .addOrUpdateEntry(species, result);
+    }
+  }
+
+  Future<void> _addShots() async {
+    final controller = TextEditingController();
+    final result = await showDialog<int>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Tilføj skud'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Antal afgivne skud'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuller')),
+          FilledButton(
+            onPressed: () {
+              final val = int.tryParse(controller.text.trim());
+              if (val != null && val > 0) Navigator.pop(ctx, val);
+            },
+            child: const Text('Tilføj'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (result != null) {
+      await ref
+          .read(gameBagProviderFamily(widget.eventId).notifier)
+          .addShots(result);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -586,56 +640,13 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 12),
-
-        // 1) Select species + count → add to list
-        GestureDetector(
-          onTap: _pickSpecies,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _selectedSpecies ?? 'Vælg art...',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: _selectedSpecies != null ? cs.onSurface : cs.outline,
-                    ),
-                  ),
-                ),
-                Icon(Icons.arrow_drop_down, color: cs.outline),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
+        // Header + tilføj knap
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: TextField(
-                controller: _countCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Antal nedlagt',
-                  filled: true,
-                  fillColor: cs.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
+            Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
             FilledButton.icon(
-              onPressed: _addEntry,
+              onPressed: _addGameEntry,
               icon: const Icon(Icons.add, size: 18),
               label: const Text('Tilføj'),
             ),
@@ -643,12 +654,17 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         ),
         const SizedBox(height: 12),
 
-        // 2) Entries list
+        // Entries list
         gameBagAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Text('Fejl: $e'),
           data: (gameBag) {
-            if (gameBag.entries.isEmpty) return const SizedBox.shrink();
+            if (gameBag.entries.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text('Ingen vildt registreret', style: TextStyle(color: cs.outline)),
+              );
+            }
             final totalGame = gameBag.entries.fold<int>(0, (s, e) => s + e.count);
 
             return Card(
@@ -718,27 +734,11 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
 
         const SizedBox(height: 20),
 
-        // 3) Afgivne skud — uafhængigt af vildt
-        Text('Afgivne skud', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 12),
+        // Afgivne skud
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: TextField(
-                controller: _shotsCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Antal skud',
-                  filled: true,
-                  fillColor: cs.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
+            Text('Afgivne skud', style: Theme.of(context).textTheme.titleMedium),
             FilledButton.icon(
               onPressed: _addShots,
               icon: const Icon(Icons.add, size: 18),
@@ -747,73 +747,19 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
           ],
         ),
         const SizedBox(height: 10),
-
-        // 4) Samlet skud total
         gameBagAsync.whenOrNull(
-          data: (gameBag) => gameBag.totalShots > 0
-              ? Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: cs.secondaryContainer.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text('Samlet: ${gameBag.totalShots} skud',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSecondaryContainer)),
-                )
-              : null,
+          data: (gameBag) => Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: cs.secondaryContainer.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text('Samlet: ${gameBag.totalShots} skud',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSecondaryContainer)),
+          ),
         ) ?? const SizedBox.shrink(),
       ],
     );
-  }
-
-  Future<void> _addEntry() async {
-    if (_selectedSpecies == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vælg en vildtart først')),
-      );
-      return;
-    }
-    final count = int.tryParse(_countCtrl.text.trim());
-    if (count == null || count <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Indtast antal nedlagt (mindst 1)')),
-      );
-      return;
-    }
-
-    try {
-      await ref
-          .read(gameBagProviderFamily(widget.eventId).notifier)
-          .addOrUpdateEntry(_selectedSpecies!, count);
-      _countCtrl.clear();
-      setState(() => _selectedSpecies = null);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Fejl: $e')));
-      }
-    }
-  }
-
-  Future<void> _addShots() async {
-    final shots = int.tryParse(_shotsCtrl.text.trim());
-    if (shots == null || shots <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Indtast antal skud')),
-      );
-      return;
-    }
-    try {
-      await ref
-          .read(gameBagProviderFamily(widget.eventId).notifier)
-          .addShots(shots);
-      _shotsCtrl.clear();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Fejl: $e')));
-      }
-    }
   }
 }
