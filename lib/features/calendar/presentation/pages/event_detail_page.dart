@@ -520,7 +520,7 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
   final _countCtrl = TextEditingController();
   final _shotsCtrl = TextEditingController();
   bool _shotsInitialized = false;
-  bool _isExpanded = false;
+  bool _isExpanded = true;
 
   @override
   void dispose() {
