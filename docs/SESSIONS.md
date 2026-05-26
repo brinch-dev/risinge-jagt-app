@@ -340,6 +340,11 @@ Kronologisk oversigt over alle udviklingssessioner.
 - **Private chat viser korrekt navn**: private 1-1 kanaler viser nu den anden persons navn i stedet for dit eget
 - **Vildtart placeholder**: bottom sheet picker har "Vælg art..." placeholder
 - **Antal-felt forbedret**: bredere felt (80px) med synlig placeholder "Antal"
+- **Dashboard live-opdatering**: HomePage konverteret til ConsumerStatefulWidget med 60-sekunders timer
+  - Nedtælling, næste event, event-statistik opdaterer hvert minut
+  - Mine reservationer og seneste chat opdaterer hvert minut
+  - Vejr opdaterer hvert 15. minut
+- **Fjernet sigekorn-ikon** fra "Samlet antal skud" felt
 - **Kode-oprydning**: 25+ analyzer issues rettet
   - `Key? key` → `super.key` i alle widget-constructors
   - `const` tilføjet hvor muligt (ColorScheme, Row, BorderSide)
@@ -348,8 +353,9 @@ Kronologisk oversigt over alle udviklingssessioner.
 - **0 analyzer issues** — fuldstændig ren codebase
 
 ### Filer ændret
+- `lib/features/home/home_page.dart` — ConsumerStatefulWidget med periodisk refresh-timer
 - `lib/providers/chat_provider.dart` — query channel_members for at finde anden persons navn
-- `lib/features/calendar/presentation/pages/event_detail_page.dart` — placeholder og feltbredde
+- `lib/features/calendar/presentation/pages/event_detail_page.dart` — placeholder, feltbredde, fjernet ikon
 - `lib/app/app.dart` — super.key
 - `lib/app/theme.dart` — const ColorScheme, const BorderSide
 - `lib/features/admin/presentation/pages/*.dart` — super.key, const, unused imports

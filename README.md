@@ -117,6 +117,8 @@ firebase deploy --only hosting
 - Fix: Private chatkanaler viser nu den anden persons navn (ikke dit eget)
 - Fix: Vildtart-felt har placeholder "Vælg art..." med bottom sheet picker
 - Fix: Antal-felt bredere med synlig placeholder
+- Fix: Dashboard widgets opdaterer nu live (nedtælling, events, reservationer, chat, vejr)
+- Fjernet sigekorn-ikon fra "Samlet antal skud" felt
 - Kode-oprydning: 25+ analyzer issues rettet (super.key, const, unused imports)
 - Tilføjet package_info_plus og path_provider som direkte dependencies
 - 0 analyzer issues

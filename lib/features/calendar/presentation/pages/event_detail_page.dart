@@ -691,11 +691,10 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
               child: TextField(
                 controller: _shotsCtrl,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Samlet antal skud for dagen',
-                  prefixIcon: Icon(Icons.gps_fixed, size: 18, color: cs.outline),
-                  border: const OutlineInputBorder(),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 ),
               ),
             ),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -56,11 +57,39 @@ final _recentMessagesProvider =
   return List<Map<String, dynamic>>.from(data);
 });
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  Timer? _refreshTimer;
+  int _tickCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+      _tickCount++;
+      ref.invalidate(upcomingEventsProvider);
+      ref.invalidate(_myReservationsProvider);
+      ref.invalidate(_recentMessagesProvider);
+      if (_tickCount % 15 == 0) {
+        ref.invalidate(_weatherProvider);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider).value;
     final blocksAsync = ref.watch(homeBlocksProvider);
     final isAdmin = profile?.isAdmin ?? false;
