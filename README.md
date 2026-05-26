@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.6.2
+# Risinge Jagtvæsen v2.8.1
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app og web app.
@@ -112,6 +112,23 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.8.1 (2026-05-26)
+- Fix: Input-felter (vildt og skud) synlige i dark mode — fjernet filled/fillColor/borderSide.none, bruger standard OutlineInputBorder
+- Fix: Buttons renderes korrekt — flyttet fra Row til full-width SizedBox
+- Fix: Per-bruger skud — database PK på game_bag_totals ændret til (event_id, user_id)
+- Sol op/ned virker for alle datoer — fallback til sunrise-sunset.org API for datoer ud over 16-dages vejrudsigt
+
+### v2.8.0 (2026-05-26)
+- Redesignet vildtpose: synlige inline kontroller (dropdown, input, buttons) i stedet for dialogs
+- Nedlagt vildt: dropdown med artsliste, antal-felt, "Tilføj vildt" knap, liste med registreringer
+- Afgivne skud: input-felt, "Tilføj skud" knap, løbende sum af alle medlemmers skud
+- Skud uafhængige af vildt — hvert medlem registrerer egne skud
+
+### v2.7.x (2026-05-26)
+- Iterationer på vildtpose-UI (dialog-flow, bottom sheet, inline kontroller)
+- Per-medlem skud-registrering med Supabase Realtime
+- game_bag_totals tabel med per-bruger tracking
 
 ### v2.6.2 (2026-05-26)
 - Fix: Private chatkanaler viser nu den anden persons navn (ikke dit eget)
