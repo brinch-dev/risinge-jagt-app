@@ -121,14 +121,15 @@ class GameBagNotifier extends AsyncNotifier<GameBagState> {
     state = AsyncData(await _fetch());
   }
 
-  Future<void> setMyShots(int shots) async {
+  Future<void> addShots(int shots) async {
     final client = ref.read(supabaseProvider);
     final userId = client.auth.currentUser?.id;
+    final current = state.value?.myShots ?? 0;
     await client.from('game_bag_totals').upsert(
       {
         'event_id': eventId,
         'user_id': userId,
-        'total_shots': shots,
+        'total_shots': current + shots,
         'updated_by': userId,
         'updated_at': DateTime.now().toIso8601String(),
       },
