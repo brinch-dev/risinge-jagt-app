@@ -516,134 +516,45 @@ class _GameBagSection extends ConsumerStatefulWidget {
 }
 
 class _GameBagSectionState extends ConsumerState<_GameBagSection> {
+  String? _selectedSpecies;
+  final _countCtrl = TextEditingController();
+  final _shotsCtrl = TextEditingController();
 
-  Future<void> _addGameEntry() async {
-    final cs = Theme.of(context).colorScheme;
+  @override
+  void dispose() {
+    _countCtrl.dispose();
+    _shotsCtrl.dispose();
+    super.dispose();
+  }
 
-    // Step 1: Pick species — bottom sheet returns the name
-    final species = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.4,
-        expand: false,
-        builder: (_, scrollCtrl) => Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text('Vælg vildtart',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: cs.onSurface)),
-            ),
-            Expanded(
-              child: ListView(
-                controller: scrollCtrl,
-                children: gameSpeciesCategories.expand((cat) => [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                    child: Text(cat.name.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: cs.primary,
-                          letterSpacing: 1,
-                        )),
-                  ),
-                  ...cat.species.map((s) => ListTile(
-                        title: Text(s),
-                        dense: true,
-                        onTap: () => Navigator.pop(ctx, s),
-                      )),
-                ]).toList(),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (species == null || !mounted) return;
-
-    // Step 2: Ask count — dialog returns the number
-    final countCtrl = TextEditingController();
-    final count = await showDialog<int>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(species),
-        content: TextField(
-          controller: countCtrl,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'Antal nedlagt'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuller')),
-          FilledButton(
-            onPressed: () {
-              final val = int.tryParse(countCtrl.text.trim());
-              if (val != null && val > 0) Navigator.pop(ctx, val);
-            },
-            child: const Text('Tilføj'),
-          ),
-        ],
-      ),
-    );
-    countCtrl.dispose();
-
-    if (count == null || !mounted) return;
-
-    // Step 3: Save
+  Future<void> _addEntry() async {
+    if (_selectedSpecies == null || _countCtrl.text.trim().isEmpty) return;
+    final count = int.tryParse(_countCtrl.text.trim());
+    if (count == null || count <= 0) return;
     try {
       await ref
           .read(gameBagProviderFamily(widget.eventId).notifier)
-          .addOrUpdateEntry(species, count);
+          .addOrUpdateEntry(_selectedSpecies!, count);
+      _countCtrl.clear();
+      setState(() => _selectedSpecies = null);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fejl: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
       }
     }
   }
 
-  Future<void> _addShots() async {
-    if (!mounted) return;
-    final controller = TextEditingController();
-    final result = await showDialog<int>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Tilføj skud'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'Antal afgivne skud'),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuller')),
-          FilledButton(
-            onPressed: () {
-              final val = int.tryParse(controller.text.trim());
-              if (val != null && val > 0) Navigator.pop(ctx, val);
-            },
-            child: const Text('Tilføj'),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
-
-    if (result == null || !mounted) return;
-
+  Future<void> _addShotsToTotal() async {
+    final shots = int.tryParse(_shotsCtrl.text.trim());
+    if (shots == null || shots <= 0) return;
     try {
       await ref
           .read(gameBagProviderFamily(widget.eventId).notifier)
-          .addShots(result);
+          .addShots(shots);
+      _shotsCtrl.clear();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Fejl: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
       }
     }
   }
@@ -652,25 +563,62 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final gameBagAsync = ref.watch(gameBagProviderFamily(widget.eventId));
+    final allSpecies = gameSpeciesCategories.expand((cat) => cat.species).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header + tilføj knap
+        Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 12),
+
+        // Dropdown til at vælge art
+        DropdownButtonFormField<String>(
+          initialValue: _selectedSpecies,
+          hint: const Text('Vælg art...'),
+          isExpanded: true,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: cs.surfaceContainerHighest,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          ),
+          items: allSpecies.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+          onChanged: (val) => setState(() => _selectedSpecies = val),
+        ),
+        const SizedBox(height: 10),
+
+        // Antal nedlagt + tilføj knap
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
-            FilledButton.icon(
-              onPressed: _addGameEntry,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Tilføj'),
+            Expanded(
+              child: TextField(
+                controller: _countCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Antal nedlagt...',
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            FilledButton(
+              onPressed: _addEntry,
+              child: const Text('Tilføj'),
             ),
           ],
         ),
         const SizedBox(height: 12),
 
-        // Entries list
+        // Liste af registreret vildt
         gameBagAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Text('Fejl: $e'),
@@ -751,18 +699,38 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         const SizedBox(height: 20),
 
         // Afgivne skud
+        Text('Afgivne skud', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 12),
+
+        // Input felt + tilføj knap
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Afgivne skud', style: Theme.of(context).textTheme.titleMedium),
-            FilledButton.icon(
-              onPressed: _addShots,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('Tilføj'),
+            Expanded(
+              child: TextField(
+                controller: _shotsCtrl,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: 'Indtast antal skud...',
+                  filled: true,
+                  fillColor: cs.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            FilledButton(
+              onPressed: _addShotsToTotal,
+              child: const Text('Tilføj'),
             ),
           ],
         ),
         const SizedBox(height: 10),
+
+        // Samlet skud
         gameBagAsync.whenOrNull(
           data: (gameBag) => Container(
             width: double.infinity,
