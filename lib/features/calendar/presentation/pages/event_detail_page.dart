@@ -31,8 +31,21 @@ final _eventWeatherFamily =
       '&timezone=Europe/Copenhagen'
       '&start_date=$dateStr&end_date=$dateStr',
     ));
-    if (response.statusCode != 200) return null;
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    }
+    // Fallback: sunrise/sunset works for any date (astronomical calculation)
+    final fallback = await http.get(Uri.parse(
+      'https://api.open-meteo.com/v1/forecast'
+      '?latitude=${params.lat}&longitude=${params.lng}'
+      '&daily=sunrise,sunset'
+      '&timezone=Europe/Copenhagen'
+      '&start_date=$dateStr&end_date=$dateStr',
+    ));
+    if (fallback.statusCode == 200) {
+      return jsonDecode(fallback.body) as Map<String, dynamic>;
+    }
+    return null;
   } catch (_) {
     return null;
   }
@@ -333,14 +346,19 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
       data: (data) {
         if (data == null) return const SizedBox.shrink();
         final daily = data['daily'] as Map<String, dynamic>;
-        final sunrise =
-            ((daily['sunrise'] as List).first as String).split('T').last;
-        final sunset =
-            ((daily['sunset'] as List).first as String).split('T').last;
-        final tempMax =
-            ((daily['temperature_2m_max'] as List).first as num).round();
-        final tempMin =
-            ((daily['temperature_2m_min'] as List).first as num).round();
+        final sunriseList = daily['sunrise'] as List?;
+        final sunsetList = daily['sunset'] as List?;
+        if (sunriseList == null || sunriseList.isEmpty ||
+            sunsetList == null || sunsetList.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        final sunrise = (sunriseList.first as String).split('T').last;
+        final sunset = (sunsetList.first as String).split('T').last;
+
+        final tempMaxRaw = (daily['temperature_2m_max'] as List?)?.first;
+        final tempMinRaw = (daily['temperature_2m_min'] as List?)?.first;
+        final int? tempMax = tempMaxRaw is num ? tempMaxRaw.round() : null;
+        final int? tempMin = tempMinRaw is num ? tempMinRaw.round() : null;
 
         return Padding(
           padding: const EdgeInsets.only(top: 8),
@@ -352,7 +370,9 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _weatherCol(context, Icons.thermostat, '$tempMin° / $tempMax°', 'Temp'),
+                  if (tempMin != null && tempMax != null)
+                    _weatherCol(context, Icons.thermostat,
+                        '$tempMin° / $tempMax°', 'Temp'),
                   _weatherCol(context, Icons.wb_twilight, sunrise, 'Sol op'),
                   _weatherCol(context,
                       Icons.nightlight_round, sunset, 'Sol ned'),
