@@ -3,11 +3,22 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jagt_app/bootstrap.dart';
 import 'package:jagt_app/models/game_bag_entry.dart';
 
+class MemberShots {
+  final String userId;
+  final String? displayName;
+  final int shots;
+
+  const MemberShots({required this.userId, this.displayName, required this.shots});
+}
+
 class GameBagState {
   final List<GameBagEntry> entries;
-  final int? totalShots;
+  final List<MemberShots> memberShots;
+  final int? myShots;
 
-  const GameBagState({this.entries = const [], this.totalShots});
+  const GameBagState({this.entries = const [], this.memberShots = const [], this.myShots});
+
+  int get totalShots => memberShots.fold<int>(0, (s, m) => s + m.shots);
 }
 
 class GameBagNotifier extends AsyncNotifier<GameBagState> {
@@ -25,19 +36,34 @@ class GameBagNotifier extends AsyncNotifier<GameBagState> {
 
   Future<GameBagState> _fetch() async {
     final client = ref.read(supabaseProvider);
+    final userId = client.auth.currentUser?.id;
+
     final entries = await client
         .from('game_bag_entries')
         .select()
         .eq('event_id', eventId)
         .order('species', ascending: true);
-    final totals = await client
+
+    final shotsRows = await client
         .from('game_bag_totals')
-        .select()
-        .eq('event_id', eventId)
-        .maybeSingle();
+        .select('user_id, total_shots, updated_by')
+        .eq('event_id', eventId);
+
+    final memberShots = <MemberShots>[];
+    int? myShots;
+    for (final row in shotsRows) {
+      final uid = (row['user_id'] ?? row['updated_by']) as String?;
+      final shots = row['total_shots'] as int?;
+      if (uid != null && shots != null) {
+        memberShots.add(MemberShots(userId: uid, shots: shots));
+        if (uid == userId) myShots = shots;
+      }
+    }
+
     return GameBagState(
       entries: (entries as List).map((e) => GameBagEntry.fromJson(e)).toList(),
-      totalShots: totals != null ? totals['total_shots'] as int? : null,
+      memberShots: memberShots,
+      myShots: myShots,
     );
   }
 
@@ -74,7 +100,7 @@ class GameBagNotifier extends AsyncNotifier<GameBagState> {
         .subscribe();
   }
 
-  Future<void> addOrUpdateEntry(String species, int count, {int? shots}) async {
+  Future<void> addOrUpdateEntry(String species, int count) async {
     final client = ref.read(supabaseProvider);
     final userId = client.auth.currentUser?.id;
     await client.from('game_bag_entries').upsert(
@@ -82,7 +108,6 @@ class GameBagNotifier extends AsyncNotifier<GameBagState> {
         'event_id': eventId,
         'species': species,
         'count': count,
-        if (shots != null) 'shots': shots,
         'created_by': userId,
       },
       onConflict: 'event_id,species',
@@ -96,17 +121,18 @@ class GameBagNotifier extends AsyncNotifier<GameBagState> {
     state = AsyncData(await _fetch());
   }
 
-  Future<void> setTotalShots(int shots) async {
+  Future<void> setMyShots(int shots) async {
     final client = ref.read(supabaseProvider);
     final userId = client.auth.currentUser?.id;
     await client.from('game_bag_totals').upsert(
       {
         'event_id': eventId,
+        'user_id': userId,
         'total_shots': shots,
         'updated_by': userId,
         'updated_at': DateTime.now().toIso8601String(),
       },
-      onConflict: 'event_id',
+      onConflict: 'event_id,user_id',
     );
     state = AsyncData(await _fetch());
   }

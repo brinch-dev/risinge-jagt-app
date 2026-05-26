@@ -518,12 +518,13 @@ class _GameBagSection extends ConsumerStatefulWidget {
 class _GameBagSectionState extends ConsumerState<_GameBagSection> {
   String? _selectedSpecies;
   final _countCtrl = TextEditingController();
-  final _shotsCtrl = TextEditingController();
+  final _myShotsCtrl = TextEditingController();
+  bool _myShotsInitialized = false;
 
   @override
   void dispose() {
     _countCtrl.dispose();
-    _shotsCtrl.dispose();
+    _myShotsCtrl.dispose();
     super.dispose();
   }
 
@@ -589,100 +590,100 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
 
-        // Entries list first
+        // Entries list
         gameBagAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Text('Fejl: $e'),
           data: (gameBag) {
-            if (gameBag.entries.isEmpty) return const SizedBox.shrink();
-            final totalGame = gameBag.entries.fold<int>(0, (s, e) => s + e.count);
-            final totalShots = gameBag.entries.fold<int>(0, (s, e) => s + (e.shots ?? 0));
+            if (!_myShotsInitialized && gameBag.myShots != null) {
+              _myShotsCtrl.text = '${gameBag.myShots}';
+              _myShotsInitialized = true;
+            }
 
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  children: [
-                    for (int i = 0; i < gameBag.entries.length; i++) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: cs.primaryContainer.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  '${gameBag.entries[i].count}',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: cs.primary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+            final totalGame = gameBag.entries.fold<int>(0, (s, e) => s + e.count);
+
+            return Column(
+              children: [
+                if (gameBag.entries.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          for (int i = 0; i < gameBag.entries.length; i++) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              child: Row(
                                 children: [
-                                  Text(gameBag.entries[i].species,
-                                      style: TextStyle(fontSize: 14, color: cs.onSurface)),
-                                  if (gameBag.entries[i].shots != null)
-                                    Text('${gameBag.entries[i].shots} skud',
-                                        style: TextStyle(fontSize: 12, color: cs.outline)),
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: cs.primaryContainer.withValues(alpha: 0.5),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${gameBag.entries[i].count}',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: cs.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(gameBag.entries[i].species,
+                                        style: TextStyle(fontSize: 14, color: cs.onSurface)),
+                                  ),
+                                  SizedBox(
+                                    width: 32,
+                                    height: 32,
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: Icon(Icons.close, size: 16, color: cs.outline),
+                                      onPressed: () => ref
+                                          .read(gameBagProviderFamily(widget.eventId).notifier)
+                                          .deleteEntry(gameBag.entries[i].id),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                            SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(Icons.close, size: 16, color: cs.outline),
-                                onPressed: () => ref
-                                    .read(gameBagProviderFamily(widget.eventId).notifier)
-                                    .deleteEntry(gameBag.entries[i].id),
-                              ),
-                            ),
+                            if (i < gameBag.entries.length - 1)
+                              Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
                           ],
-                        ),
-                      ),
-                      if (i < gameBag.entries.length - 1)
-                        Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
-                    ],
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('$totalGame nedlagt',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
-                          if (totalShots > 0)
-                            Text('$totalShots skud',
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('$totalGame nedlagt',
+                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                                if (gameBag.totalShots > 0)
+                                  Text('${gameBag.totalShots} skud total',
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+              ],
             );
           },
         ),
 
-        // Add entry form
+        // Add entry form: art + antal
         Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
@@ -718,14 +719,56 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                   ),
                 ),
                 const SizedBox(height: 12),
+                TextField(
+                  controller: _countCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Antal nedlagt',
+                    filled: true,
+                    fillColor: cs.surfaceContainerHighest,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _addEntry,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Tilføj'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // My shots — independent of animals
+        Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Mine afgivne skud', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+                const SizedBox(height: 4),
+                Text('Registrer dit samlede antal skud for dette event',
+                    style: TextStyle(fontSize: 12, color: cs.outline)),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
-                        controller: _countCtrl,
+                        controller: _myShotsCtrl,
                         keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                          labelText: 'Antal nedlagt',
+                          labelText: 'Antal skud',
                           filled: true,
                           fillColor: cs.surfaceContainerHighest,
                           border: OutlineInputBorder(
@@ -736,31 +779,11 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: TextField(
-                        controller: _shotsCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: 'Skud brugt',
-                          filled: true,
-                          fillColor: cs.surfaceContainerHighest,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
+                    FilledButton(
+                      onPressed: _saveMyShots,
+                      child: const Text('Gem'),
                     ),
                   ],
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _addEntry,
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Tilføj'),
-                  ),
                 ),
               ],
             ),
@@ -784,15 +807,38 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
       );
       return;
     }
-    final shots = int.tryParse(_shotsCtrl.text.trim());
 
     try {
       await ref
           .read(gameBagProviderFamily(widget.eventId).notifier)
-          .addOrUpdateEntry(_selectedSpecies!, count, shots: shots);
+          .addOrUpdateEntry(_selectedSpecies!, count);
       _countCtrl.clear();
-      _shotsCtrl.clear();
       setState(() => _selectedSpecies = null);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Fejl: $e')));
+      }
+    }
+  }
+
+  Future<void> _saveMyShots() async {
+    final shots = int.tryParse(_myShotsCtrl.text.trim());
+    if (shots == null || shots < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Indtast antal skud')),
+      );
+      return;
+    }
+    try {
+      await ref
+          .read(gameBagProviderFamily(widget.eventId).notifier)
+          .setMyShots(shots);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Skud gemt')),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context)
