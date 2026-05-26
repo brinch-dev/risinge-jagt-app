@@ -589,64 +589,7 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         Text('Nedlagt vildt', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
 
-        // Input: art, antal nedlagt, skud brugt
-        GestureDetector(
-          onTap: _pickSpecies,
-          child: InputDecorator(
-            decoration: InputDecoration(
-              hintText: 'Vælg art...',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              suffixIcon: Icon(Icons.arrow_drop_down, color: cs.outline),
-            ),
-            child: Text(
-              _selectedSpecies ?? 'Vælg art...',
-              style: TextStyle(
-                color: _selectedSpecies != null ? cs.onSurface : cs.outline,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _countCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Antal nedlagt',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: TextField(
-                controller: _shotsCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Skud brugt',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton.icon(
-            onPressed: _addEntry,
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Tilføj'),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Entries list
+        // Entries list first
         gameBagAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Text('Fejl: $e'),
@@ -655,85 +598,173 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
             final totalGame = gameBag.entries.fold<int>(0, (s, e) => s + e.count);
             final totalShots = gameBag.entries.fold<int>(0, (s, e) => s + (e.shots ?? 0));
 
-            return Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                children: [
-                  for (int i = 0; i < gameBag.entries.length; i++) ...[
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: cs.primaryContainer.withValues(alpha: 0.5),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${gameBag.entries[i].count}',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  color: cs.primary,
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    for (int i = 0; i < gameBag.entries.length; i++) ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: cs.primaryContainer.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${gameBag.entries[i].count}',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.primary,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(gameBag.entries[i].species,
-                                    style: TextStyle(fontSize: 14, color: cs.onSurface)),
-                                if (gameBag.entries[i].shots != null)
-                                  Text('${gameBag.entries[i].shots} skud',
-                                      style: TextStyle(fontSize: 12, color: cs.outline)),
-                              ],
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(gameBag.entries[i].species,
+                                      style: TextStyle(fontSize: 14, color: cs.onSurface)),
+                                  if (gameBag.entries[i].shots != null)
+                                    Text('${gameBag.entries[i].shots} skud',
+                                        style: TextStyle(fontSize: 12, color: cs.outline)),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            width: 32,
-                            height: 32,
-                            child: IconButton(
-                              padding: EdgeInsets.zero,
-                              icon: Icon(Icons.close, size: 16, color: cs.outline),
-                              onPressed: () => ref
-                                  .read(gameBagProviderFamily(widget.eventId).notifier)
-                                  .deleteEntry(gameBag.entries[i].id),
+                            SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: IconButton(
+                                padding: EdgeInsets.zero,
+                                icon: Icon(Icons.close, size: 16, color: cs.outline),
+                                onPressed: () => ref
+                                    .read(gameBagProviderFamily(widget.eventId).notifier)
+                                    .deleteEntry(gameBag.entries[i].id),
+                              ),
                             ),
-                          ),
+                          ],
+                        ),
+                      ),
+                      if (i < gameBag.entries.length - 1)
+                        Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
+                    ],
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('$totalGame nedlagt',
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
+                          if (totalShots > 0)
+                            Text('$totalShots skud',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
                         ],
                       ),
                     ),
-                    if (i < gameBag.entries.length - 1)
-                      Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
                   ],
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('$totalGame nedlagt',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
-                        if (totalShots > 0)
-                          Text('$totalShots skud',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurfaceVariant)),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               ),
             );
           },
+        ),
+
+        // Add entry form
+        Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Tilføj vildt', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: _pickSpecies,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _selectedSpecies ?? 'Vælg art...',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: _selectedSpecies != null ? cs.onSurface : cs.outline,
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.arrow_drop_down, color: cs.outline),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _countCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Antal nedlagt',
+                          filled: true,
+                          fillColor: cs.surfaceContainerHighest,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _shotsCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Skud brugt',
+                          filled: true,
+                          fillColor: cs.surfaceContainerHighest,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _addEntry,
+                    icon: const Icon(Icons.add, size: 18),
+                    label: const Text('Tilføj'),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
