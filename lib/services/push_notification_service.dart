@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:jagt_app/features/notifications/presentation/pages/notifications_page.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -80,7 +81,14 @@ class PushNotificationService {
     if (notification == null) return;
 
     final channelId = message.data['channel_id'] as String?;
-    final type = message.data['type'] as String?;
+    final type = message.data['type'] as String? ?? 'notification';
+
+    String payload;
+    if (channelId != null && type == 'chat') {
+      payload = 'chat|$channelId|${notification.title}';
+    } else {
+      payload = 'notification';
+    }
 
     _localNotifications.show(
       notification.hashCode,
@@ -95,15 +103,19 @@ class PushNotificationService {
           priority: Priority.high,
         ),
       ),
-      payload: channelId != null ? '$type|$channelId|${notification.title}' : null,
+      payload: payload,
     );
   }
 
   void _handleMessageTap(RemoteMessage message) {
     final channelId = message.data['channel_id'] as String?;
+    final type = message.data['type'] as String?;
     final channelName = message.notification?.title;
-    if (channelId != null) {
+
+    if (type == 'chat' && channelId != null) {
       _navigateToChat(channelId, channelName ?? 'Chat');
+    } else {
+      _navigateToNotifications();
     }
   }
 
@@ -116,6 +128,8 @@ class PushNotificationService {
       final channelId = parts[1];
       final channelName = parts.length >= 3 ? parts[2] : 'Chat';
       PushNotificationService()._navigateToChat(channelId, channelName);
+    } else {
+      PushNotificationService()._navigateToNotifications();
     }
   }
 
@@ -126,6 +140,19 @@ class PushNotificationService {
 
       GoRouter.of(ctx).push(
         '/chat/$channelId?name=${Uri.encodeComponent(channelName)}',
+      );
+    });
+  }
+
+  void _navigateToNotifications() {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      final ctx = navigatorKey.currentContext;
+      if (ctx == null || !ctx.mounted) return;
+
+      Navigator.of(ctx).push(
+        MaterialPageRoute(
+          builder: (_) => const NotificationsPage(),
+        ),
       );
     });
   }

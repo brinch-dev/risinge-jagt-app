@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:jagt_app/bootstrap.dart';
 import 'package:jagt_app/models/app_notification.dart';
 import 'package:jagt_app/providers/auth_provider.dart';
 import 'package:jagt_app/models/user_profile.dart';
+
+const _dismissedKey = 'dismissed_notifications';
 
 class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
   RealtimeChannel? _channel;
@@ -14,6 +17,11 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     _subscribeRealtime();
     ref.onDispose(() => _channel?.unsubscribe());
     return data;
+  }
+
+  Future<Set<String>> _getDismissedIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(_dismissedKey) ?? []).toSet();
   }
 
   Future<List<AppNotification>> _fetch() async {
@@ -35,6 +43,8 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
     final readIds =
         (readData as List).map((e) => e['notification_id'] as String).toSet();
 
+    final dismissedIds = await _getDismissedIds();
+
     final profile = ref.read(userProfileProvider).value;
     final userRole = profile?.role.dbValue ?? 'gaest';
 
@@ -42,6 +52,7 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
         .map((e) =>
             AppNotification.fromJson(e, isRead: readIds.contains(e['id'])))
         .where((n) => n.targetRole == 'all' || n.targetRole == userRole)
+        .where((n) => !dismissedIds.contains(n.id))
         .toList();
   }
 
@@ -112,6 +123,25 @@ class NotificationsNotifier extends AsyncNotifier<List<AppNotification>> {
       'reference_id': eventId,
       'target_role': 'all',
     });
+  }
+
+  Future<void> dismissNotification(String notificationId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final dismissed = (prefs.getStringList(_dismissedKey) ?? []).toSet();
+    dismissed.add(notificationId);
+    await prefs.setStringList(_dismissedKey, dismissed.toList());
+    state = AsyncData(await _fetch());
+  }
+
+  Future<void> dismissAllRead() async {
+    final current = state.value ?? [];
+    final readIds = current.where((n) => n.isRead).map((n) => n.id).toSet();
+    if (readIds.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    final dismissed = (prefs.getStringList(_dismissedKey) ?? []).toSet();
+    dismissed.addAll(readIds);
+    await prefs.setStringList(_dismissedKey, dismissed.toList());
+    state = AsyncData(await _fetch());
   }
 
   Future<void> refresh() async {

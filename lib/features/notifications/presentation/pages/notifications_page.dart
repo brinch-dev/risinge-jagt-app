@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:jagt_app/models/app_notification.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,6 +10,26 @@ import 'package:jagt_app/providers/admin_log_provider.dart';
 
 class NotificationsPage extends ConsumerWidget {
   const NotificationsPage({super.key});
+
+  void _handleNotificationTap(BuildContext context, WidgetRef ref, AppNotification notif) {
+    if (!notif.isRead) {
+      ref.read(notificationsProvider.notifier).markAsRead(notif.id);
+    }
+
+    switch (notif.type) {
+      case NotificationType.chatMessage:
+      case NotificationType.chatGeneral:
+        if (notif.referenceId != null) {
+          GoRouter.of(context).push(
+            '/chat/${notif.referenceId}?name=${Uri.encodeComponent(notif.title)}',
+          );
+        }
+        break;
+      case NotificationType.newEvent:
+      case NotificationType.broadcast:
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,10 +41,24 @@ class NotificationsPage extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Notifikationer'),
         actions: [
-          TextButton(
-            onPressed: () =>
-                ref.read(notificationsProvider.notifier).markAllAsRead(),
-            child: const Text('Marker alle læst'),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'read') {
+                ref.read(notificationsProvider.notifier).markAllAsRead();
+              } else if (value == 'delete_read') {
+                ref.read(notificationsProvider.notifier).dismissAllRead();
+              }
+            },
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'read',
+                child: Text('Marker alle læst'),
+              ),
+              const PopupMenuItem(
+                value: 'delete_read',
+                child: Text('Slet alle læste'),
+              ),
+            ],
           ),
         ],
       ),
@@ -48,16 +83,27 @@ class NotificationsPage extends ConsumerWidget {
             padding: const EdgeInsets.all(8),
             itemBuilder: (context, index) {
               final notif = notifications[index];
-              return _NotificationTile(
-                notification: notif,
-                isAdmin: isAdmin,
-                onTap: () {
-                  if (!notif.isRead) {
-                    ref
-                        .read(notificationsProvider.notifier)
-                        .markAsRead(notif.id);
-                  }
+              return Dismissible(
+                key: ValueKey(notif.id),
+                direction: DismissDirection.endToStart,
+                background: Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.only(right: 20),
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.error,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.delete, color: Colors.white),
+                ),
+                onDismissed: (_) {
+                  ref.read(notificationsProvider.notifier).dismissNotification(notif.id);
                 },
+                child: _NotificationTile(
+                  notification: notif,
+                  isAdmin: isAdmin,
+                  onTap: () => _handleNotificationTap(context, ref, notif),
+                ),
               );
             },
           );
