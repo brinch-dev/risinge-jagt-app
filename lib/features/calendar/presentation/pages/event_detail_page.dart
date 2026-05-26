@@ -577,12 +577,7 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
           hint: const Text('Vælg art...'),
           isExpanded: true,
           decoration: InputDecoration(
-            filled: true,
-            fillColor: cs.surfaceContainerHighest,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           ),
           items: allSpecies.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
@@ -590,31 +585,26 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         ),
         const SizedBox(height: 10),
 
-        // Antal nedlagt + tilføj knap
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _countCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Antal nedlagt...',
-                  filled: true,
-                  fillColor: cs.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            FilledButton(
-              onPressed: _addEntry,
-              child: const Text('Tilføj'),
-            ),
-          ],
+        // Antal nedlagt
+        TextField(
+          controller: _countCtrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'Antal nedlagt...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Tilføj vildt knap
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton(
+            onPressed: _addEntry,
+            child: const Text('Tilføj vildt'),
+          ),
         ),
         const SizedBox(height: 12),
 
@@ -702,31 +692,26 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         Text('Afgivne skud', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
 
-        // Input felt + tilføj knap
-        Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: _shotsCtrl,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  hintText: 'Indtast antal skud...',
-                  filled: true,
-                  fillColor: cs.surfaceContainerHighest,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            FilledButton(
-              onPressed: _addShotsToTotal,
-              child: const Text('Tilføj'),
-            ),
-          ],
+        // Input felt for skud
+        TextField(
+          controller: _shotsCtrl,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            hintText: 'Indtast antal skud...',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Tilføj skud knap
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton(
+            onPressed: _addShotsToTotal,
+            child: const Text('Tilføj skud'),
+          ),
         ),
         const SizedBox(height: 10),
 
