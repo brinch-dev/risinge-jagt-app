@@ -49,6 +49,8 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
       final lat = areas.isNotEmpty ? areas.first.centerLat : 55.3835;
       final lng = areas.isNotEmpty ? areas.first.centerLng : 10.6100;
       final dateStr = _date.toIso8601String().split('T').first;
+
+      // Try forecast API first (works ~16 days ahead)
       final response = await http.get(Uri.parse(
         'https://api.open-meteo.com/v1/forecast'
         '?latitude=$lat&longitude=$lng'
@@ -57,7 +59,38 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
         '&start_date=$dateStr&end_date=$dateStr',
       ));
       if (response.statusCode == 200 && mounted) {
-        setState(() => _weatherData = jsonDecode(response.body) as Map<String, dynamic>);
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final daily = data['daily'] as Map<String, dynamic>?;
+        final sr = daily?['sunrise'] as List?;
+        if (sr != null && sr.isNotEmpty) {
+          setState(() => _weatherData = data);
+          if (mounted) setState(() => _loadingWeather = false);
+          return;
+        }
+      }
+
+      // Fallback: sunrise-sunset.org for dates beyond forecast range
+      final fallback = await http.get(Uri.parse(
+        'https://api.sunrise-sunset.org/json'
+        '?lat=$lat&lng=$lng&date=$dateStr&formatted=0',
+      ));
+      if (fallback.statusCode == 200 && mounted) {
+        final data = jsonDecode(fallback.body) as Map<String, dynamic>;
+        if (data['status'] == 'OK') {
+          final results = data['results'] as Map<String, dynamic>;
+          final srUtc = DateTime.parse(results['sunrise'] as String);
+          final ssUtc = DateTime.parse(results['sunset'] as String);
+          final srLocal = srUtc.toLocal();
+          final ssLocal = ssUtc.toLocal();
+          final srStr = '${srLocal.hour.toString().padLeft(2, '0')}:${srLocal.minute.toString().padLeft(2, '0')}';
+          final ssStr = '${ssLocal.hour.toString().padLeft(2, '0')}:${ssLocal.minute.toString().padLeft(2, '0')}';
+          setState(() => _weatherData = {
+            'daily': {
+              'sunrise': ['${dateStr}T$srStr'],
+              'sunset': ['${dateStr}T$ssStr'],
+            },
+          });
+        }
       }
     } catch (_) {}
     if (mounted) setState(() => _loadingWeather = false);
