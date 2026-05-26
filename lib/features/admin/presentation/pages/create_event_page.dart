@@ -40,7 +40,10 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
   }
 
   Future<void> _fetchWeather() async {
-    setState(() => _loadingWeather = true);
+    setState(() {
+      _loadingWeather = true;
+      _weatherData = null;
+    });
     try {
       final areas = ref.read(huntAreasProvider).value ?? [];
       final lat = areas.isNotEmpty ? areas.first.centerLat : 55.3835;
@@ -49,11 +52,11 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
       final response = await http.get(Uri.parse(
         'https://api.open-meteo.com/v1/forecast'
         '?latitude=$lat&longitude=$lng'
-        '&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code'
+        '&daily=sunrise,sunset'
         '&timezone=Europe/Copenhagen'
         '&start_date=$dateStr&end_date=$dateStr',
       ));
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && mounted) {
         setState(() => _weatherData = jsonDecode(response.body) as Map<String, dynamic>);
       }
     } catch (_) {}
@@ -134,10 +137,14 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
     if (_weatherData == null) return const SizedBox.shrink();
 
     final daily = _weatherData!['daily'] as Map<String, dynamic>;
-    final sunrise = ((daily['sunrise'] as List).first as String).split('T').last;
-    final sunset = ((daily['sunset'] as List).first as String).split('T').last;
-    final tempMax = ((daily['temperature_2m_max'] as List).first as num).round();
-    final tempMin = ((daily['temperature_2m_min'] as List).first as num).round();
+    final sunriseList = daily['sunrise'] as List?;
+    final sunsetList = daily['sunset'] as List?;
+    if (sunriseList == null || sunriseList.isEmpty ||
+        sunsetList == null || sunsetList.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final sunrise = (sunriseList.first as String).split('T').last;
+    final sunset = (sunsetList.first as String).split('T').last;
 
     final cs = Theme.of(context).colorScheme;
     return Card(
@@ -152,7 +159,7 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
                 Icon(Icons.wb_sunny, color: cs.secondary, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Vejr d. ${DateFormat('d. MMM', 'da').format(_date)}',
+                  'Sol d. ${DateFormat('d. MMM', 'da').format(_date)}',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -165,7 +172,6 @@ class _CreateEventPageState extends ConsumerState<CreateEventPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _weatherInfo(Icons.thermostat, '$tempMin° / $tempMax°', 'Temp'),
                 _weatherInfo(Icons.wb_twilight, sunrise, 'Sol op'),
                 _weatherInfo(Icons.nightlight_round, sunset, 'Sol ned'),
               ],
