@@ -74,7 +74,7 @@ class GameBagNotifier extends AsyncNotifier<GameBagState> {
         .subscribe();
   }
 
-  Future<void> addOrUpdateEntry(String species, int count) async {
+  Future<void> addOrUpdateEntry(String species, int count, {int? shots}) async {
     final client = ref.read(supabaseProvider);
     final userId = client.auth.currentUser?.id;
     await client.from('game_bag_entries').upsert(
@@ -82,6 +82,7 @@ class GameBagNotifier extends AsyncNotifier<GameBagState> {
         'event_id': eventId,
         'species': species,
         'count': count,
+        if (shots != null) 'shots': shots,
         'created_by': userId,
       },
       onConflict: 'event_id,species',

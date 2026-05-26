@@ -3,6 +3,7 @@ class GameBagEntry {
   final String eventId;
   final String species;
   final int count;
+  final int? shots;
   final String? createdBy;
   final DateTime createdAt;
 
@@ -11,6 +12,7 @@ class GameBagEntry {
     required this.eventId,
     required this.species,
     required this.count,
+    this.shots,
     this.createdBy,
     required this.createdAt,
   });
@@ -21,6 +23,7 @@ class GameBagEntry {
       eventId: json['event_id'] as String,
       species: json['species'] as String,
       count: json['count'] as int,
+      shots: json['shots'] as int?,
       createdBy: json['created_by'] as String?,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
