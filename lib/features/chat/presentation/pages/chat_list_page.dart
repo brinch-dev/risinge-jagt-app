@@ -124,6 +124,7 @@ class ChatListPage extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'chat_fab',
         onPressed: () {
           Navigator.push(
             context,

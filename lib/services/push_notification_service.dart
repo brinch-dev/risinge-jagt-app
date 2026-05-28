@@ -28,6 +28,7 @@ class PushNotificationService {
       await _localNotifications.initialize(
         const InitializationSettings(
           android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+          iOS: DarwinInitializationSettings(),
         ),
         onDidReceiveNotificationResponse: _onLocalTap,
       );
@@ -50,9 +51,13 @@ class PushNotificationService {
   }
 
   Future<void> _saveToken() async {
-    final token = await _messaging.getToken();
-    if (token == null) return;
-    await _updateToken(token);
+    try {
+      final token = await _messaging.getToken();
+      if (token == null) return;
+      await _updateToken(token);
+    } catch (_) {
+      // APNs token not available on simulator — skip
+    }
   }
 
   Future<void> _updateToken(String token) async {

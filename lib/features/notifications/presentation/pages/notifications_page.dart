@@ -111,6 +111,7 @@ class NotificationsPage extends ConsumerWidget {
       ),
       floatingActionButton: isAdmin
           ? FloatingActionButton(
+              heroTag: 'notifications_fab',
               onPressed: () => _showBroadcastDialog(context, ref),
               child: const Icon(Icons.campaign),
             )
@@ -212,15 +213,16 @@ class _NotificationTile extends StatelessWidget {
             const SizedBox(height: 2),
             Row(
               children: [
-                Text(
-                  notification.typeLabel,
-                  style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500),
+                Flexible(
+                  child: Text(
+                    notification.senderName != null
+                        ? '${notification.typeLabel} - ${notification.senderName}'
+                        : notification.typeLabel,
+                    style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                if (notification.senderName != null) ...[
-                  const Text(' - ', style: TextStyle(fontSize: 11)),
-                  Text(notification.senderName!, style: const TextStyle(fontSize: 11)),
-                ],
-                const Spacer(),
+                const SizedBox(width: 4),
                 Text(
                   timeago.format(notification.createdAt, locale: 'da'),
                   style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.outline),

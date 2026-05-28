@@ -50,7 +50,6 @@ app.*.map.json
 *.keystore
 key.properties
 google-services.json
-firebase_options.dart
 
 # Firebase cache
 .firebase/

@@ -92,6 +92,7 @@ class ManageAreasPage extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'areas_fab',
         onPressed: () {
           Navigator.push(
             context,

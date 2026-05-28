@@ -1,10 +1,11 @@
 # Risinge Jagtvæsen v2.8.1
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
-Tilgængelig som Android app og web app.
+Tilgængelig som Android app, iOS app og web app.
 
 - **Web**: https://risinge-jagt.web.app
 - **Android APK**: https://github.com/brinch-dev/risinge-jagt-app/releases/latest
+- **iOS**: TestFlight (kommer snart)
 
 ## Funktioner
 
@@ -92,6 +93,7 @@ Tilgængelig som Android app og web app.
 
 ## Platforme
 - **Android**: APK distribution via GitHub Releases med auto-opdatering
+- **iOS**: TestFlight distribution (kræver Apple Developer Program)
 - **Web**: Firebase Hosting (uden GPS, geofencing og push)
 
 ## CI/CD
@@ -100,6 +102,7 @@ GitHub Actions bygger og deployer automatisk ved push til `main`:
 2. Bygger Flutter web
 3. Deployer web til Firebase Hosting
 4. Opretter GitHub Release med APK
+5. Bygger iOS IPA og uploader til TestFlight (kræver Apple Developer secrets)
 
 ## Lokal udvikling
 ```bash
@@ -112,6 +115,15 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.8.2 (2026-05-28)
+- iOS platform tilføjet: Firebase, push notifikationer, lokation og kamera-permissions
+- iOS minimum deployment target sat til 15.0
+- FloatingActionButton heroTag-konflikter rettet (alle FABs har nu unikke tags)
+- Notifikationsliste overflow rettet (lang afsendernavn trunkeres korrekt)
+- APNs token håndteret gracefully på simulator
+- GitHub Actions: iOS-job tilføjet (macos-latest, TestFlight upload)
+- CLAUDE.md tilføjet med udviklerdokumentation
 
 ### v2.8.1 (2026-05-26)
 - Fix: Input-felter (vildt og skud) synlige i dark mode — fjernet filled/fillColor/borderSide.none, bruger standard OutlineInputBorder

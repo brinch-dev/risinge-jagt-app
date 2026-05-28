@@ -150,6 +150,7 @@ class _CalendarPageState extends ConsumerState<CalendarPage> {
       ),
       floatingActionButton: profile != null && profile.canCreateEvents
           ? FloatingActionButton(
+              heroTag: 'calendar_fab',
               onPressed: () {
                 Navigator.push(
                   context,
