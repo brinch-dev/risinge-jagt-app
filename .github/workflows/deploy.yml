@@ -7,6 +7,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -20,7 +23,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.5'
+          flutter-version: '3.44.0'
           channel: stable
 
       - name: Create .env
@@ -73,12 +76,13 @@ jobs:
 
   build-ios:
     runs-on: macos-latest
+    if: ${{ secrets.APPLE_CERTIFICATE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.5'
+          flutter-version: '3.44.0'
           channel: stable
 
       - name: Create .env
@@ -111,15 +115,17 @@ jobs:
         run: cd ios && pod install
 
       - name: Build IPA
-        run: flutter build ipa --release
-          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          flutter build ipa --release \
+            --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+            --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Upload to TestFlight
         run: |
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 -d > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
           xcrun altool --upload-app \
             --type ios \
-            --file build/ios/ipa/*.ipa \
+            --file $(find build/ios/ipa -name "*.ipa") \
             --apiKey "${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}" \
-            --apiIssuer "${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}" \
-            --apiKeyPath <(echo "${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}" | base64 -d)
+            --apiIssuer "${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}"

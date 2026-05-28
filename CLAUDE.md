@@ -34,7 +34,9 @@ Flutter app til Risinge Jagtvæsen. iOS + Android + Web.
 
 ## CI/CD
 - Push til `main` bygger: Android APK (GitHub Release) + Web (Firebase Hosting) + iOS IPA (TestFlight)
-- iOS-job kræver Apple Developer secrets i GitHub — se project memory for liste
+- iOS-job springer automatisk over hvis `APPLE_CERTIFICATE_BASE64` secret ikke er sat
+- Node.js 24 aktiveret via `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true`
+- Flutter version i workflow: 3.44.0
 
 ## Secrets der mangler (tilføjes når Apple Developer konto er aktiv)
 - `APPLE_CERTIFICATE_BASE64`

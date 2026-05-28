@@ -1,4 +1,4 @@
-# Risinge Jagtvæsen v2.8.1
+# Risinge Jagtvæsen v2.8.3
 
 Jagtkoordineringsapp til Risinge Herregaard. Flutter + Supabase.
 Tilgængelig som Android app, iOS app og web app.
@@ -115,6 +115,12 @@ firebase deploy --only hosting
 ```
 
 ## Versionshistorik
+
+### v2.8.3 (2026-05-28)
+- CI/CD: iOS-job springer over hvis Apple Developer secrets ikke er sat (undgår fejl)
+- CI/CD: Opgraderet til Node.js 24 (GitHub dropper Node.js 20 support 2. juni 2026)
+- CI/CD: Flutter version opdateret til 3.44.0 i workflow
+- CI/CD: TestFlight upload rettet (korrekt p8-nøgle placering)
 
 ### v2.8.2 (2026-05-28)
 - iOS platform tilføjet: Firebase, push notifikationer, lokation og kamera-permissions
