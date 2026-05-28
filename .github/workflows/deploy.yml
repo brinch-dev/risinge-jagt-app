@@ -7,9 +7,6 @@ on:
 permissions:
   contents: write
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -76,7 +73,7 @@ jobs:
 
   build-ios:
     runs-on: macos-latest
-    if: ${{ secrets.APPLE_CERTIFICATE_BASE64 != '' }}
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
