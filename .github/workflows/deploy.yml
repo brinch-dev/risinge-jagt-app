@@ -105,11 +105,8 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}" | base64 -d > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
 
-      - name: Disable automatic signing
-        run: |
-          sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = QA74JVPV7P;/g' ios/Runner.xcodeproj/project.pbxproj
-          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
-          sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = "";/PROVISIONING_PROFILE_SPECIFIER = "Risinge Jagt AppStore";/g' ios/Runner.xcodeproj/project.pbxproj
+      - name: Verify signing config
+        run: grep -c "CODE_SIGN_STYLE = Manual" ios/Runner.xcodeproj/project.pbxproj
 
       - name: Create ExportOptions.plist
         run: |
