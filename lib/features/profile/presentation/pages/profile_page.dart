@@ -115,6 +115,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
         ],
+        const SizedBox(height: 16),
+        Card(
+          color: Theme.of(context).colorScheme.errorContainer,
+          child: ListTile(
+            leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+            title: Text('Slet konto', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            subtitle: const Text('Sletter din konto og alle dine data permanent'),
+            onTap: () => _confirmDeleteAccount(),
+          ),
+        ),
         const SizedBox(height: 32),
         FutureBuilder<PackageInfo>(
           future: PackageInfo.fromPlatform(),
@@ -170,6 +180,45 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       case UserRole.gaest:
         return cs.surfaceContainerHighest;
     }
+  }
+
+  void _confirmDeleteAccount() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Slet konto permanent?'),
+        content: const Text(
+          'Dette sletter din konto og alle tilhørende data permanent. '
+          'Handlingen kan ikke fortrydes.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Annuller'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                if (!kIsWeb) await PushNotificationService().removeToken();
+                await ref.read(authServiceProvider).deleteAccount();
+                if (context.mounted) context.go('/login');
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Fejl ved sletning: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Slet konto'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _editName(UserProfile profile) {

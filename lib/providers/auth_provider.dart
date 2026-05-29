@@ -112,6 +112,14 @@ class AuthService {
   Future<void> signOut() async {
     await _client.auth.signOut();
   }
+
+  Future<void> deleteAccount() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return;
+    await _client.from('profiles').delete().eq('id', userId);
+    await _client.rpc('delete_my_account');
+    await _client.auth.signOut();
+  }
 }
 
 final authServiceProvider = Provider<AuthService>((ref) {
