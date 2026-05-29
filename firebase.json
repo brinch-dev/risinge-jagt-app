@@ -1,12 +1,1 @@
-{
-  "hosting": {
-    "public": "build/web",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  }
-}
+{"hosting":{"public":"build/web","ignore":["firebase.json","**/.*","**/node_modules/**"],"rewrites":[{"source":"**","destination":"/index.html"}]},"flutter":{"platforms":{"android":{"default":{"projectId":"risinge-jagt","appId":"1:112345670114:android:48d8dd08d3b2512df399bb","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"risinge-jagt","appId":"1:112345670114:ios:10e87fae2a79f312f399bb","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"risinge-jagt","configurations":{"android":"1:112345670114:android:48d8dd08d3b2512df399bb","ios":"1:112345670114:ios:10e87fae2a79f312f399bb"}}}}}}

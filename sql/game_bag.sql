@@ -2,7 +2,7 @@
 -- Kør dette i Supabase SQL Editor
 
 -- Tabel til vildtudbytte-registreringer per event
-CREATE TABLE game_bag_entries (
+CREATE TABLE IF NOT EXISTS game_bag_entries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   event_id uuid NOT NULL REFERENCES hunt_events(id) ON DELETE CASCADE,
   species text NOT NULL,
@@ -12,12 +12,14 @@ CREATE TABLE game_bag_entries (
   UNIQUE(event_id, species)
 );
 
--- Tabel til samlet antal skud per event
-CREATE TABLE game_bag_totals (
-  event_id uuid PRIMARY KEY REFERENCES hunt_events(id) ON DELETE CASCADE,
+-- Tabel til samlet antal skud per event per bruger
+CREATE TABLE IF NOT EXISTS game_bag_totals (
+  event_id uuid NOT NULL REFERENCES hunt_events(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES auth.users(id),
   total_shots integer NOT NULL DEFAULT 0,
   updated_by uuid REFERENCES auth.users(id),
-  updated_at timestamptz DEFAULT now()
+  updated_at timestamptz DEFAULT now(),
+  PRIMARY KEY (event_id, user_id)
 );
 
 -- RLS
