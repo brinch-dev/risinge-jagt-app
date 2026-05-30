@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:jagt_app/models/hunt_event.dart';
 import 'package:jagt_app/models/user_profile.dart';
 import 'package:jagt_app/providers/auth_provider.dart';
+import 'package:jagt_app/providers/event_signup_provider.dart';
 import 'package:jagt_app/providers/homepage_provider.dart';
 import 'package:jagt_app/providers/event_provider.dart';
 import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
@@ -209,12 +211,9 @@ class _HomePageState extends ConsumerState<HomePage> {
       case 'info_cards':
         return const SizedBox.shrink();
       case 'next_event':
-        return _NextEventBlock(ref: ref);
+        return const SizedBox.shrink();
       case 'event_stats':
-        return GestureDetector(
-          onTap: () => _goToTab(ref, 2),
-          child: _EventStatsBlock(ref: ref),
-        );
+        return _UpcomingEventsBlock(ref: ref);
       case 'weather':
         return _WeatherBlock(ref: ref);
       case 'my_reservations':
@@ -225,10 +224,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           child: _RecentChatBlock(ref: ref),
         );
       case 'countdown':
-        return GestureDetector(
-          onTap: () => _goToTab(ref, 2),
-          child: _CountdownBlock(ref: ref),
-        );
+        return _NextEventCountdownBlock(ref: ref);
       case 'text':
         return _TextBlock(block: block);
       case 'announcement':
@@ -292,11 +288,11 @@ class _WelcomeBlock extends StatelessWidget {
   }
 }
 
-// --- Next Event ---
+// --- Next Event + Countdown (combined) ---
 
-class _NextEventBlock extends StatelessWidget {
+class _NextEventCountdownBlock extends StatelessWidget {
   final WidgetRef ref;
-  const _NextEventBlock({required this.ref});
+  const _NextEventCountdownBlock({required this.ref});
 
   @override
   Widget build(BuildContext context) {
@@ -304,81 +300,124 @@ class _NextEventBlock extends StatelessWidget {
     final upcoming = ref.watch(upcomingEventsProvider);
     final event = upcoming.isNotEmpty ? upcoming.first : null;
 
+    if (event == null) return const SizedBox.shrink();
+
+    final now = DateTime.now();
+    final eventDate = DateTime(event.date.year, event.date.month, event.date.day);
+    final diff = eventDate.difference(DateTime(now.year, now.month, now.day));
+    String countdownText;
+    if (diff.inDays == 0) {
+      countdownText = 'I DAG';
+    } else if (diff.inDays == 1) {
+      countdownText = 'I MORGEN';
+    } else {
+      countdownText = '${diff.inDays} DAGE';
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: GestureDetector(
-        onTap: event != null
-            ? () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EventDetailPage(event: event),
-                  ),
-                )
-            : null,
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => EventDetailPage(event: event)),
+        ),
         child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(Icons.calendar_month,
-                    color: cs.primary, size: 28),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: event != null
-                    ? Column(
+          color: cs.surfaceContainerLowest,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(color: cs.primary, width: 2),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('NÆSTE EVENT',
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: cs.outline,
+                        letterSpacing: 1.2)),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: cs.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(countdownText,
+                          style: TextStyle(
+                              color: cs.onPrimary,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 18)),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('NÆSTE EVENT',
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                  color: cs.outline,
-                                  letterSpacing: 1.2)),
-                          const SizedBox(height: 4),
                           Text(event.title,
                               style: TextStyle(
-                                  fontSize: 17,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: cs.onSurface)),
-                          const SizedBox(height: 2),
                           Text(
-                            '${DateFormat('EEEE d. MMM', 'da').format(event.date)}'
+                            '${DateFormat('EEEE d. MMMM', 'da').format(event.date)}'
                             '${event.startTime != null ? ' kl. ${event.startTime}' : ''}',
-                            style: TextStyle(
-                                fontSize: 13, color: cs.onSurfaceVariant),
+                            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
                           ),
                         ],
-                      )
-                    : Text('Ingen kommende events',
-                        style: TextStyle(fontSize: 15, color: cs.outline)),
-              ),
-            ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: cs.outline),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
 }
 
-// --- Event Stats ---
+// --- Upcoming Events List ---
 
-class _EventStatsBlock extends StatelessWidget {
+class _UpcomingEventsBlock extends StatelessWidget {
   final WidgetRef ref;
-  const _EventStatsBlock({required this.ref});
+  const _UpcomingEventsBlock({required this.ref});
+
+  String _statusLabel(HuntEvent event, List signups, String? userId) {
+    if (userId == null) return 'Ikke reageret';
+    final signup = signups.where((s) => s.eventId == event.id && s.userId == userId).firstOrNull;
+    if (signup == null) return 'Ikke reageret';
+    return signup.isAttending ? 'Tilmeldt' : 'Kommer ikke';
+  }
+
+  Color _statusColor(String label, ColorScheme cs) {
+    switch (label) {
+      case 'Tilmeldt':
+        return cs.primary;
+      case 'Kommer ikke':
+        return cs.error;
+      default:
+        return cs.outline;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final upcoming = ref.watch(upcomingEventsProvider);
+    final signups = ref.watch(eventSignupsProvider).value ?? [];
+    final userId = ref.watch(currentUserProvider)?.id;
+
+    if (upcoming.isEmpty) return const SizedBox.shrink();
+
+    final preview = upcoming.take(3).toList();
+    final hasMore = upcoming.length > 3;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -386,36 +425,205 @@ class _EventStatsBlock extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: cs.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(Icons.event_note, color: cs.primary, size: 24),
-              ),
-              const SizedBox(width: 14),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text('EVENTS',
+                  Icon(Icons.event_note, color: cs.primary, size: 20),
+                  const SizedBox(width: 8),
+                  Text('KOMMENDE EVENTS',
                       style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
                           color: cs.outline,
                           letterSpacing: 1.2)),
-                  const SizedBox(height: 4),
-                  Text('${upcoming.length} kommende',
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: cs.onSurface)),
+                  const Spacer(),
+                  Text('${upcoming.length} i alt',
+                      style: TextStyle(fontSize: 12, color: cs.outline)),
                 ],
               ),
+              const SizedBox(height: 12),
+              ...preview.map((event) {
+                final label = _statusLabel(event, signups, userId);
+                return GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => EventDetailPage(event: event)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: cs.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              DateFormat('d\nMMM', 'da').format(event.date),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: cs.primary,
+                                  height: 1.2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(event.title,
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: cs.onSurface),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
+                              Text(
+                                DateFormat('EEEE', 'da').format(event.date) +
+                                    (event.startTime != null ? ' kl. ${event.startTime}' : ''),
+                                style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _statusColor(label, cs).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(label,
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: _statusColor(label, cs))),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+              if (hasMore) ...[
+                const Divider(),
+                GestureDetector(
+                  onTap: () => _showAllEvents(context, upcoming, signups, userId, cs),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Se alle ${upcoming.length} events',
+                          style: TextStyle(fontSize: 13, color: cs.primary, fontWeight: FontWeight.w600)),
+                      Icon(Icons.expand_more, color: cs.primary, size: 18),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showAllEvents(BuildContext context, List<HuntEvent> events, List signups,
+      String? userId, ColorScheme cs) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.95,
+        minChildSize: 0.4,
+        expand: false,
+        builder: (ctx, scrollController) => Column(
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(
+                  color: cs.outline.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Alle kommende events',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: cs.onSurface)),
+            ),
+            Expanded(
+              child: ListView.separated(
+                controller: scrollController,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: events.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (ctx, i) {
+                  final event = events[i];
+                  final signup = signups
+                      .where((s) => s.eventId == event.id && s.userId == userId)
+                      .firstOrNull;
+                  final label = signup == null
+                      ? 'Ikke reageret'
+                      : signup.isAttending
+                          ? 'Tilmeldt'
+                          : 'Kommer ikke';
+                  return ListTile(
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_) => EventDetailPage(event: event)));
+                    },
+                    leading: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                          color: cs.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Center(
+                        child: Text(
+                          DateFormat('d\nMMM', 'da').format(event.date),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 11, fontWeight: FontWeight.bold,
+                              color: cs.primary, height: 1.2),
+                        ),
+                      ),
+                    ),
+                    title: Text(event.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(DateFormat('EEEE d. MMMM', 'da').format(event.date),
+                        style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                          color: (label == 'Tilmeldt'
+                                  ? cs.primary
+                                  : label == 'Kommer ikke'
+                                      ? cs.error
+                                      : cs.outline)
+                              .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Text(label,
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: label == 'Tilmeldt'
+                                  ? cs.primary
+                                  : label == 'Kommer ikke'
+                                      ? cs.error
+                                      : cs.outline)),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -831,86 +1039,6 @@ class _RecentChatBlock extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-// --- Countdown ---
-
-class _CountdownBlock extends StatelessWidget {
-  final WidgetRef ref;
-  const _CountdownBlock({required this.ref});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final upcoming = ref.watch(upcomingEventsProvider);
-    if (upcoming.isEmpty) return const SizedBox.shrink();
-
-    final event = upcoming.first;
-    final now = DateTime.now();
-    final eventDate = DateTime(event.date.year, event.date.month, event.date.day);
-    final diff = eventDate.difference(DateTime(now.year, now.month, now.day));
-
-    String countdownText;
-    if (diff.inDays == 0) {
-      countdownText = 'I DAG';
-    } else if (diff.inDays == 1) {
-      countdownText = 'I MORGEN';
-    } else {
-      countdownText = '${diff.inDays} DAGE';
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Card(
-        color: cs.surfaceContainerLowest,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: cs.primary, width: 2),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Row(
-            children: [
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                decoration: BoxDecoration(
-                  color: cs.primary,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  countdownText,
-                  style: TextStyle(
-                    color: cs.onPrimary,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(event.title,
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: cs.onSurface)),
-                    Text(
-                      DateFormat('EEEE d. MMMM', 'da').format(event.date),
-                      style:
-                          TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

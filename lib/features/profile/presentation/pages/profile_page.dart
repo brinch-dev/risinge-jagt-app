@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:jagt_app/providers/auth_provider.dart';
 import 'package:jagt_app/models/user_profile.dart';
 import 'package:jagt_app/features/notifications/presentation/widgets/notification_bell.dart';
+import 'package:jagt_app/features/profile/presentation/pages/journal_page.dart';
 import 'package:jagt_app/services/push_notification_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -98,6 +99,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         const SizedBox(height: 32),
         Card(
           child: ListTile(
+            leading: const Icon(Icons.menu_book),
+            title: const Text('Jagtjournal'),
+            subtitle: const Text('Personlig registrering pr. kreds'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const JournalPage()),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: ListTile(
             leading: const Icon(Icons.edit),
             title: const Text('Rediger navn'),
             onTap: () => _editName(profile),
@@ -115,15 +129,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
         ],
-        const SizedBox(height: 16),
-        Card(
-          color: Theme.of(context).colorScheme.errorContainer,
-          child: ListTile(
-            leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
-            title: Text('Slet konto', style: TextStyle(color: Theme.of(context).colorScheme.error)),
-            subtitle: const Text('Sletter din konto og alle dine data permanent'),
-            onTap: () => _confirmDeleteAccount(),
+        const SizedBox(height: 32),
+        const Divider(),
+        const SizedBox(height: 8),
+        TextButton(
+          onPressed: () => _confirmDeleteAccount(),
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.error,
           ),
+          child: const Text('Slet konto', style: TextStyle(fontSize: 13)),
         ),
         const SizedBox(height: 32),
         FutureBuilder<PackageInfo>(
