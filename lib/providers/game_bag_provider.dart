@@ -137,6 +137,22 @@ class GameBagNotifier extends AsyncNotifier<GameBagState> {
     );
     state = AsyncData(await _fetch());
   }
+
+  Future<void> setShots(int shots) async {
+    final client = ref.read(supabaseProvider);
+    final userId = client.auth.currentUser?.id;
+    await client.from('game_bag_totals').upsert(
+      {
+        'event_id': eventId,
+        'user_id': userId,
+        'total_shots': shots,
+        'updated_by': userId,
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      onConflict: 'event_id,user_id',
+    );
+    state = AsyncData(await _fetch());
+  }
 }
 
 final gameBagProviderFamily =

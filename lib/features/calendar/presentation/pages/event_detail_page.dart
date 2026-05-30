@@ -17,6 +17,7 @@ import 'package:jagt_app/features/towers/presentation/pages/tower_reservation_pa
 import 'package:jagt_app/features/admin/presentation/pages/edit_event_page.dart';
 import 'package:jagt_app/providers/event_provider.dart';
 import 'package:jagt_app/providers/game_bag_provider.dart';
+import 'package:jagt_app/providers/checkin_provider.dart';
 import 'package:jagt_app/constants/game_species.dart';
 
 final _eventWeatherFamily =
@@ -212,6 +213,11 @@ class _EventDetailPageState extends ConsumerState<EventDetailPage> {
                 label: const Text('Se poster'),
               ),
             ],
+          ],
+
+          if (profile != null && !profile.isGuest) ...[
+            const SizedBox(height: 16),
+            _CheckInSection(eventId: event.id),
           ],
 
           const SizedBox(height: 24),
@@ -519,6 +525,7 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
   String? _selectedSpecies;
   final _countCtrl = TextEditingController();
   final _shotsCtrl = TextEditingController();
+  bool _editingShots = false;
 
   @override
   void dispose() {
@@ -544,14 +551,15 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
     }
   }
 
-  Future<void> _addShotsToTotal() async {
+  Future<void> _saveShotsTotal() async {
     final shots = int.tryParse(_shotsCtrl.text.trim());
-    if (shots == null || shots <= 0) return;
+    if (shots == null || shots < 0) return;
     try {
       await ref
           .read(gameBagProviderFamily(widget.eventId).notifier)
-          .addShots(shots);
+          .setShots(shots);
       _shotsCtrl.clear();
+      if (mounted) setState(() => _editingShots = false);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
@@ -689,33 +697,30 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
         const SizedBox(height: 20),
 
         // Afgivne skud
-        Text('Afgivne skud', style: Theme.of(context).textTheme.titleMedium),
+        Row(
+          children: [
+            Text('Afgivne skud', style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            gameBagAsync.whenOrNull(
+              data: (gameBag) => TextButton.icon(
+                icon: Icon(_editingShots ? Icons.close : Icons.edit, size: 16),
+                label: Text(_editingShots ? 'Annuller' : 'Rediger'),
+                onPressed: () {
+                  setState(() {
+                    _editingShots = !_editingShots;
+                    if (_editingShots) {
+                      _shotsCtrl.text = '${gameBag.totalShots}';
+                    } else {
+                      _shotsCtrl.clear();
+                    }
+                  });
+                },
+              ),
+            ) ?? const SizedBox.shrink(),
+          ],
+        ),
         const SizedBox(height: 12),
 
-        // Input felt for skud
-        TextField(
-          controller: _shotsCtrl,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(
-            hintText: 'Indtast antal skud...',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        // Tilføj skud knap
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: FilledButton(
-            onPressed: _addShotsToTotal,
-            child: const Text('Tilføj skud'),
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        // Samlet skud
         gameBagAsync.whenOrNull(
           data: (gameBag) => Container(
             width: double.infinity,
@@ -728,7 +733,164 @@ class _GameBagSectionState extends ConsumerState<_GameBagSection> {
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSecondaryContainer)),
           ),
         ) ?? const SizedBox.shrink(),
+
+        if (_editingShots) ...[
+          const SizedBox(height: 12),
+          TextField(
+            controller: _shotsCtrl,
+            keyboardType: TextInputType.number,
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'Korriger antal skud',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: _saveShotsTotal,
+              child: const Text('Gem antal skud'),
+            ),
+          ),
+        ],
       ],
+    );
+  }
+}
+
+// --- Check-in / Check-out ---
+
+class _CheckInSection extends ConsumerWidget {
+  final String eventId;
+  const _CheckInSection({required this.eventId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final checkinAsync = ref.watch(checkinProviderFamily(eventId));
+
+    return checkinAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (checkin) {
+        final isCheckedIn = checkin?.isCheckedIn ?? false;
+
+        return Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+            side: BorderSide(
+              color: isCheckedIn ? cs.primary : cs.outlineVariant,
+              width: isCheckedIn ? 2 : 1,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isCheckedIn ? Icons.location_on : Icons.location_off,
+                      color: isCheckedIn ? cs.primary : cs.outline,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'TJEK IND / TJEK UD',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: cs.outline,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (isCheckedIn && checkin?.checkedInAt != null)
+                      Text(
+                        'Tjekket ind ${TimeOfDay.fromDateTime(checkin!.checkedInAt!).format(context)}',
+                        style: TextStyle(fontSize: 12, color: cs.outline),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: isCheckedIn
+                            ? null
+                            : () async {
+                                await ref
+                                    .read(checkinProviderFamily(eventId).notifier)
+                                    .checkIn();
+                              },
+                        icon: const Icon(Icons.login, size: 18),
+                        label: const Text('Tjek ind'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: isCheckedIn
+                              ? cs.primary
+                              : cs.primary.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: !isCheckedIn
+                            ? null
+                            : () async {
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Tjek ud'),
+                                    content: const Text(
+                                      'Dine poster-reservationer for dette event vil blive annulleret. Fortsæt?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(ctx, false),
+                                        child: const Text('Annuller'),
+                                      ),
+                                      FilledButton(
+                                        onPressed: () => Navigator.pop(ctx, true),
+                                        child: const Text('Tjek ud'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirmed == true) {
+                                  await ref
+                                      .read(checkinProviderFamily(eventId).notifier)
+                                      .checkOut();
+                                }
+                              },
+                        icon: const Icon(Icons.logout, size: 18),
+                        label: const Text('Tjek ud'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: !isCheckedIn
+                              ? cs.error.withValues(alpha: 0.4)
+                              : cs.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (checkin?.checkedOutAt != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Tjekket ud ${TimeOfDay.fromDateTime(checkin!.checkedOutAt!).format(context)}',
+                    style: TextStyle(fontSize: 12, color: cs.outline),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
